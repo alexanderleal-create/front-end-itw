@@ -1,0 +1,121 @@
+<template>
+    <header class="z-40">
+        <div class="shadow-sm">
+            <div class="relative bg-white dark:bg-[#0e1726] flex items-center px-5 py-2.5">
+
+                <!-- Logo + Sidebar toggle -->
+                <div class="flex items-center gap-3">
+                    <button
+                        class="lg:hidden p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                        @click="store.toggleSidebar()"
+                    >
+                        <IconMenu class="w-5 h-5" />
+                    </button>
+
+                    <router-link to="/analytics" class="flex items-center">
+                        <img src="/assets/images/logo.png" class="w-8" />
+                        <span class="ml-2 text-xl font-semibold dark:text-white">
+                            AUTOMATION ITW
+                        </span>
+                    </router-link>
+                </div>
+
+                <!-- Right actions -->
+                <div class="ml-auto flex items-center gap-3">
+
+                    <!-- Theme switch -->
+                    <button
+                        v-if="store.theme === 'light'"
+                        @click="store.toggleTheme('dark')"
+                        class="p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                    >
+                        <IconSun />
+                    </button>
+
+                    <button
+                        v-else-if="store.theme === 'dark'"
+                        @click="store.toggleTheme('system')"
+                        class="p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                    >
+                        <IconMoon />
+                    </button>
+
+                    <button
+                        v-else
+                        @click="store.toggleTheme('light')"
+                        class="p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                    >
+                        <IconLaptop />
+                    </button>
+
+                    <!-- User menu -->
+                    <Popper placement="bottom-end" offsetDistance="8">
+                        <button class="flex items-center gap-2">
+                            <img
+                                src="/assets/images/user-profile.jpeg"
+                                class="w-9 h-9 rounded-full object-cover"
+                            />
+                        </button>
+
+                        <template #content="{ close }">
+                            <ul class="w-44 text-sm font-semibold dark:text-white-dark bg-white dark:bg-[#1b2e4b] rounded shadow">
+
+                                <li>
+                                    <router-link
+                                        to="/users/profile"
+                                        class="flex items-center px-4 py-2 hover:text-primary"
+                                        @click="close()"
+                                    >
+                                        <IconUser class="w-4 h-4 mr-2" />
+                                        Perfil
+                                    </router-link>
+                                </li>
+
+                                <li class="border-t border-gray-200 dark:border-white/10">
+                                    <button
+                                        class="flex items-center px-4 py-2 text-danger w-full hover:bg-gray-100 dark:hover:bg-white/5"
+                                        @click="handleLogout(close)"
+                                    >
+                                        <IconLogout class="w-4 h-4 mr-2 rotate-90" />
+                                        Salir
+                                    </button>
+                                </li>
+
+                            </ul>
+                        </template>
+                    </Popper>
+
+                </div>
+            </div>
+        </div>
+    </header>
+</template>
+
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+import { useAppStore } from '@/stores';
+
+import IconMenu from '@/components/icon/icon-menu.vue';
+import IconSun from '@/components/icon/icon-sun.vue';
+import IconMoon from '@/components/icon/icon-moon.vue';
+import IconLaptop from '@/components/icon/icon-laptop.vue';
+import IconUser from '@/components/icon/icon-user.vue';
+import IconLogout from '@/components/icon/icon-logout.vue';
+
+const store = useAppStore();
+const router = useRouter();
+
+
+const handleLogout = async (close: Function) => {
+    close();
+
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+
+    store.setMainLayout('auth');
+
+    await router.replace('/auth/boxed-signin');
+};
+</script>

@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "name": "Juan Pérez",
+    "email": "juan.perez@empresa.com",
+    "role": "tester",
+    "status": "activo",
+    "password": "test123",
+    "mustChangePassword": false
+  },
+  {
+    "id": 2,
+    "name": "María López",
+    "email": "maria.lopez@empresa.com",
+    "role": "leader",
+    "status": "temporal",
+    "mustChangePassword": true
+  }
+]
