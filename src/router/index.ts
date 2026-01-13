@@ -1,22 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAppStore } from '@/stores';
-
-/**
- * layout: 'auth' → sin sidebar
- * layout: 'app'  → con sidebar
- */
+import dashboard from '@/views/dashboard.vue';
+import login from '@/views/auth/boxed-signin.vue';
 
 const routes = [
     // ================= PANEL PRINCIPAL =================
     {
         path: '/',
-        redirect: '/analytics',
+        redirect: '/dashboard',
         meta: { requiresAuth: true },
     },
 
     {
-        path: '/analytics',
-        component: () => import('@/views/analytics.vue'),
+        path: '/dashboard',
+        component: dashboard,
         meta: {
             requiresAuth: true,
             layout: 'app',
@@ -25,11 +22,6 @@ const routes = [
 
     // ================= EMPLEADOS =================
 
-    /**
-     * 📋 TABLA DE EMPLEADOS
-     * 👉 src/views/users/employees-table.vue
-     * 👉 SE MUESTRA DENTRO DEL PANEL
-     */
     {
         path: '/users/employees',
         component: () => import('@/views/users/employees-table.vue'),
@@ -40,7 +32,7 @@ const routes = [
     },
 
     /**
-     * 👤 ALTA DE EMPLEADOS (INTERNA)
+     * ALTA DE EMPLEADOS
      */
     {
         path: '/auth/boxed-signup',
@@ -62,7 +54,7 @@ const routes = [
 
     {
         path: '/auth/boxed-signin',
-        component: () => import('@/views/auth/boxed-signin.vue'),
+        component: login,
         meta: { layout: 'auth' },
     },
 
@@ -78,27 +70,22 @@ const router = createRouter({
     routes,
 });
 
-
 router.beforeEach((to, from, next) => {
     const store = useAppStore();
     const token = sessionStorage.getItem('token');
 
-    // 🧱 Layout dinámico
     store.setMainLayout(to.meta?.layout === 'auth' ? 'auth' : 'app');
 
-    // 🔓 Recuperación pública siempre permitida
     if (to.path === '/auth/boxed-password-reset') {
         next();
         return;
     }
 
-    // 🔐 Rutas protegidas
     if (to.meta?.requiresAuth && !token) {
         next('/auth/boxed-signin');
         return;
     }
 
-    // ⛔ Usuario logueado no vuelve al login
     if (token && to.path === '/auth/boxed-signin') {
         next('/analytics');
         return;

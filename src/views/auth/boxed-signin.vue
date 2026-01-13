@@ -2,6 +2,7 @@
   <div class="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-[#060818] px-6">
     <div class="w-full max-w-[440px] rounded-md bg-white/80 dark:bg-black/50 backdrop-blur-lg p-8">
 
+      <!-- TÍTULO -->
       <div class="mb-8 text-center">
         <h1 class="text-3xl font-extrabold uppercase text-primary">
           Iniciar sesión
@@ -11,43 +12,67 @@
         </p>
       </div>
 
+      <!-- ERROR -->
       <p v-if="error" class="mb-4 text-sm text-red-600 text-center">
         {{ error }}
       </p>
 
       <form class="space-y-5" @submit.prevent="handleLogin">
 
+        <!-- USERNAME -->
         <div>
-          <label class="block text-sm mb-1">Correo electrónico</label>
+          <label class="block text-sm mb-1">Usuario</label>
           <input
-            type="email"
-            v-model="form.email"
+            type="text"
+            v-model="form.username"
             class="form-input"
-            placeholder="correo@ejemplo.com"
+            placeholder="usuario123"
           />
         </div>
 
+        <!-- PASSWORD -->
         <div>
           <label class="block text-sm mb-1">Contraseña</label>
-          <input
-            type="password"
-            v-model="form.password"
-            class="form-input"
-            placeholder="••••••••"
-          />
+          <div class="relative">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="form.password"
+              class="form-input pr-10"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
+              @click="showPassword = !showPassword"
+            >
+              {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
         </div>
 
+        <!-- RECORDAR -->
         <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="checkbox" v-model="form.remember" class="form-checkbox" />
-          Recordar mis datos
+          <input type="checkbox" v-model="form" class="form-checkbox" />
+          Recordar sesión
         </label>
+
+        <!-- RECUPERAR -->
+        <div class="text-right text-sm">
+          <button
+            type="button"
+            class="text-primary hover:underline"
+            @click="handlePasswordReset"
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
+        </div>
 
         <button
           type="submit"
           class="btn btn-gradient w-full uppercase"
-          :disabled="loading"
+          :disabled="loading || isBlocked"
         >
-          {{ loading ? 'Validando...' : 'Entrar' }}
+          {{ isBlocked ? 'Usuario bloqueado' : loading ? 'Validando...' : 'Entrar' }}
         </button>
 
       </form>
@@ -55,95 +80,113 @@
   </div>
 </template>
 
-
-<script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useMeta } from '@/composables/use-meta'
-import { employeeService } from '@/services/employee.service'
+import api from '@/api/axios/axios'
+import Swal from 'sweetalert2'
 
-useMeta({ title: 'Iniciar sesión' })
+export default defineComponent({
+  name: 'Login',
 
-const router = useRouter()
-const loading = ref(false)
-const error = ref('')
+  setup() {
+    useMeta({ title: 'Iniciar sesión' })
+  },
 
-const MAX_ATTEMPTS = 5
-
-const form = reactive({
-  email: '',
-  password: '',
-  remember: false,
-})
-
-onMounted(() => {
-  const remembered = localStorage.getItem('remember-data')
-  if (remembered) {
-    const data = JSON.parse(remembered)
-    form.email = data.email || ''
-    form.password = data.password || ''
-    form.remember = true
-  }
-})
-
-const handleLogin = async () => {
-  error.value = ''
-  loading.value = true
-
-  await new Promise((r) => setTimeout(r, 600))
-
-  const email = form.email.trim().toLowerCase()
-  const attemptsKey = `login-attempts:${email}`
-  let attempts = Number(localStorage.getItem(attemptsKey) || 0)
-
-
-  const employee = employeeService
-    .getAll()
-    .find(e => e.email === email)
-
-
-  const passwordCorrect = form.password.length >= 1
-
-  if (!employee || !passwordCorrect) {
-    attempts++
-    localStorage.setItem(attemptsKey, String(attempts))
-
-    if (attempts >= MAX_ATTEMPTS) {
-      console.warn('[Login] Redirigiendo a recuperación:', email)
-      router.push('/auth/boxed-password-reset')
-      return
+  data() {
+    return {
+      form: {
+        username: '',
+        password: '',
+      },
+      error: '',
+      showPassword: false,
+      isBlocked: false,
+      loading: false,
     }
+  },
 
-    error.value = `Credenciales incorrectas. Intento ${attempts} de ${MAX_ATTEMPTS}`
-    loading.value = false
-    return
-  }
+  watch: {
+    'form.username'(value: string) {
+      this.error = ''
+      this.isBlocked = false
+      if (!value) return
 
-  localStorage.removeItem(attemptsKey)
+    
+    },
+  },
 
-  if (form.remember) {
-    localStorage.setItem(
-      'remember-data',
-      JSON.stringify({
-        email: form.email,
-        password: form.password,
-      })
-    )
-  } else {
-    localStorage.removeItem('remember-data')
-  }
+  methods: {
+    
+    async handleLogin() {
+      if (this.loading || this.isBlocked) return
 
-  sessionStorage.setItem(
-    'token',
-    JSON.stringify({
-      email: employee.email,
-      role: employee.role,
-      loginAt: new Date().toISOString(),
-    })
-  )
+      this.error = ''
+      this.loading = true
 
-  loading.value = false
-  router.push('/analytics')
-}
+      if (!this.form.username || !this.form.password) {
+        this.error = 'Debes ingresar usuario y contraseña.'
+        this.loading = false
+        return
+      }
+
+      console.log('Iniciando sesión para:', this.form.username, this.form.password)
+
+      try {
+        const response = await api.post(
+          'login/',
+          {
+            username: this.form.username.trim(),
+            password: this.form.password,
+          },
+          {
+            meta: { triggeredByButton: true },
+          }
+        )
+
+        const expTime = response.data.exp
+        const timeexpiration = new Date(expTime * 1000)
+        localStorage.setItem('token_exp', timeexpiration.toISOString())
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Bienvenido',
+          text: `Sesión iniciada como ${this.form.username}`,
+          timer: 1500,
+          showConfirmButton: false,
+        })
+
+        this.$router.push('/dashboard')
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          this.error = 'Usuario o contraseña incorrectos'
+        } else if (err.response?.status === 403) {
+          this.isBlocked = true
+          Swal.fire({
+            icon: 'error',
+            title: 'Usuario bloqueado',
+            text: 'Tu cuenta está bloqueada. Contacta al administrador.',
+          })
+        } else {
+          this.error = 'Error al conectar con el servidor'
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    handlePasswordReset() {
+      if (this.isBlocked) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Usuario bloqueado',
+          text: 'No puedes recuperar la contraseña.',
+        })
+        return
+      }
+
+      this.$router.push('/auth/boxed-password-reset')
+    },
+  },
+})
 </script>
-

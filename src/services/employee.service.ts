@@ -4,7 +4,7 @@ import baseEmployees from '@/data/employees.base.json';
 const STORAGE_KEY = 'itw-employees';
 
 class EmployeeService {
-    /** Inicializa desde JSON base si no existe data */
+    
     init() {
         const exists = localStorage.getItem(STORAGE_KEY);
         if (!exists) {
@@ -54,7 +54,7 @@ class EmployeeService {
         this.save(employees);
     }
 
-    /** 🔐 Asignar contraseña temporal */
+    /** Asignar contraseña temporal */
     setTemporaryPassword(id: number, tempPassword: string) {
         const employees = this.getAll().map((emp) =>
             emp.id === id
