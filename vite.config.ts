@@ -10,6 +10,10 @@ export default defineConfig({
             include: path.resolve(__dirname, './src/locales/**'),
         }),
     ],
+    server: {
+        port: 8081,
+        strictPort: true,
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),

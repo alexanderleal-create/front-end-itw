@@ -134,7 +134,7 @@ export default defineComponent({
 
       try {
         const response = await api.post(
-          'login/',
+          'itwframe/',
           {
             username: this.form.username.trim(),
             password: this.form.password,
@@ -146,6 +146,7 @@ export default defineComponent({
 
         const expTime = response.data.exp
         const timeexpiration = new Date(expTime * 1000)
+        console.log(expTime)
         localStorage.setItem('token_exp', timeexpiration.toISOString())
 
         Swal.fire({
