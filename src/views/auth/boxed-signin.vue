@@ -2,7 +2,6 @@
   <div class="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-[#060818] px-6">
     <div class="w-full max-w-[440px] rounded-md bg-white/80 dark:bg-black/50 backdrop-blur-lg p-8">
 
-      <!-- TÍTULO -->
       <div class="mb-8 text-center">
         <h1 class="text-3xl font-extrabold uppercase text-primary">
           Iniciar sesión
@@ -12,14 +11,12 @@
         </p>
       </div>
 
-      <!-- ERROR -->
       <p v-if="error" class="mb-4 text-sm text-red-600 text-center">
         {{ error }}
       </p>
 
       <form class="space-y-5" @submit.prevent="handleLogin">
 
-        <!-- USERNAME -->
         <div>
           <label class="block text-sm mb-1">Usuario</label>
           <input
@@ -30,7 +27,6 @@
           />
         </div>
 
-        <!-- PASSWORD -->
         <div>
           <label class="block text-sm mb-1">Contraseña</label>
           <div class="relative">
@@ -50,13 +46,11 @@
           </div>
         </div>
 
-        <!-- RECORDAR -->
         <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="checkbox" v-model="form" class="form-checkbox" />
+          <input type="checkbox" v-model="rememberMe" class="form-checkbox" />
           Recordar sesión
         </label>
 
-        <!-- RECUPERAR -->
         <div class="text-right text-sm">
           <button
             type="button"
@@ -99,6 +93,7 @@ export default defineComponent({
         username: '',
         password: '',
       },
+      rememberMe: false,
       error: '',
       showPassword: false,
       isBlocked: false,
@@ -110,14 +105,10 @@ export default defineComponent({
     'form.username'(value: string) {
       this.error = ''
       this.isBlocked = false
-      if (!value) return
-
-    
     },
   },
 
   methods: {
-    
     async handleLogin() {
       if (this.loading || this.isBlocked) return
 
@@ -130,24 +121,25 @@ export default defineComponent({
         return
       }
 
-      console.log('Iniciando sesión para:', this.form.username, this.form.password)
-
       try {
-        const response = await api.post(
-          'itwframe/',
-          {
-            username: this.form.username.trim(),
-            password: this.form.password,
-          },
-          {
-            meta: { triggeredByButton: true },
-          }
-        )
+        //  El backend configura las cookies automáticamente
+        const response = await api.post('', {
+          username: this.form.username.trim(),
+          password: this.form.password,
+        })
 
-        const expTime = response.data.exp
-        const timeexpiration = new Date(expTime * 1000)
-        console.log(expTime)
-        localStorage.setItem('token_exp', timeexpiration.toISOString())
+        // Guardar solo info del usuario (opcional, para mostrar en UI)
+        const userData = {
+          username: this.form.username,
+          exp: response.data.exp
+        }
+        sessionStorage.setItem('user', JSON.stringify(userData))
+
+        // ✅ Guardar expiración local (para validaciones del frontend)
+        const currentDate = new Date()
+        const expirationMinutes = 30 // Debe coincidir con ACCESS_TOKEN_LIFETIME (30 min)
+        const expirationDate = new Date(currentDate.getTime() + expirationMinutes * 60 * 1000)
+        localStorage.setItem('token_exp', expirationDate.toISOString())
 
         Swal.fire({
           icon: 'success',
@@ -157,7 +149,10 @@ export default defineComponent({
           showConfirmButton: false,
         })
 
-        this.$router.push('/dashboard')
+        setTimeout(() => {
+          this.$router.push('/dashboard')
+        }, 1500)
+
       } catch (err: any) {
         if (err.response?.status === 401) {
           this.error = 'Usuario o contraseña incorrectos'
@@ -189,5 +184,5 @@ export default defineComponent({
       this.$router.push('/auth/boxed-password-reset')
     },
   },
-})
+}) 
 </script>

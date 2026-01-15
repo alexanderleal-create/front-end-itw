@@ -1,26 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAppStore } from '@/stores';
-import dashboard from '@/views/dashboard.vue';
-import login from '@/views/auth/boxed-signin.vue';
+import api from '@/api/axios/axios';
 
 const routes = [
-    // ================= PANEL PRINCIPAL =================
     {
         path: '/',
-        redirect: '/dashboard',
-        meta: { requiresAuth: true },
+        redirect: '/auth/boxed-signin',
+        meta: { requiresAuth: false },
     },
 
     {
         path: '/dashboard',
-        component: dashboard,
+        component: () => import('@/views/dashboard.vue'),
         meta: {
             requiresAuth: true,
             layout: 'app',
         },
     },
-
-    // ================= EMPLEADOS =================
 
     {
         path: '/users/employees',
@@ -31,9 +27,6 @@ const routes = [
         },
     },
 
-    /**
-     * ALTA DE EMPLEADOS
-     */
     {
         path: '/auth/boxed-signup',
         component: () => import('@/views/auth/boxed-signup.vue'),
@@ -54,14 +47,20 @@ const routes = [
 
     {
         path: '/auth/boxed-signin',
-        component: login,
-        meta: { layout: 'auth' },
+        component: () => import('@/views/auth/boxed-signin.vue'),
+        meta: { 
+            layout: 'auth',
+            requiresAuth: false 
+        },
     },
 
     {
         path: '/auth/boxed-password-reset',
         component: () => import('@/views/auth/boxed-password-reset.vue'),
-        meta: { layout: 'auth' },
+        meta: { 
+            layout: 'auth',
+            requiresAuth: false 
+        },
     },
 ];
 
@@ -70,24 +69,51 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const store = useAppStore();
-    const token = sessionStorage.getItem('token');
+    
+    // Configurar layout
+    const targetLayout = to.meta?.layout === 'auth' ? 'auth' : 'app';
+    store.setMainLayout(targetLayout);
 
-    store.setMainLayout(to.meta?.layout === 'auth' ? 'auth' : 'app');
-
-    if (to.path === '/auth/boxed-password-reset') {
+    // Rutas públicas
+    const publicRoutes = ['/auth/boxed-signin', '/auth/boxed-password-reset'];
+    
+    if (publicRoutes.includes(to.path)) {
+        // Si intenta ir al login pero ya está autenticado
+        if (to.path === '/auth/boxed-signin') {
+            try {
+                //  Validar con el backend si tiene cookies válidas
+                await api.get('protected/');
+                // Ya está autenticado, redirigir al dashboard
+                next('/dashboard');
+                return;
+            } catch {
+                // No autenticado, permitir acceso al login
+                next();
+                return;
+            }
+        }
+        
         next();
         return;
     }
 
-    if (to.meta?.requiresAuth && !token) {
-        next('/auth/boxed-signin');
-        return;
-    }
-
-    if (token && to.path === '/auth/boxed-signin') {
-        next('/analytics');
+    // Rutas protegidas
+    if (to.meta?.requiresAuth) {
+        try {
+            // Llamar al endpoint protegido para validar autenticación
+            await api.get('protected/');
+            
+            // Usuario autenticado, permitir acceso
+            next();
+        } catch (error) {
+            // No autenticado o token expirado
+            sessionStorage.removeItem('user');
+            localStorage.removeItem('token_exp');
+            store.setMainLayout('auth');
+            next('/auth/boxed-signin');
+        }
         return;
     }
 
