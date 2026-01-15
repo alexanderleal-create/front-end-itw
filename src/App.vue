@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-    import { computed } from 'vue';
+    import { computed, watch } from 'vue';
 
     import appLayout from '@/layouts/app-layout.vue';
     import authLayout from '@/layouts/auth-layout.vue';
@@ -18,9 +18,18 @@
     import { useIdleLogout } from '@/composables/useIdleLogout';
 
     const store = useAppStore();
-    useIdleLogout();
 
-    // meta
+    // ✅ Solo activar idle logout cuando esté en layout 'app'
+    watch(
+        () => store.mainLayout,
+        (newLayout) => {
+            if (newLayout === 'app') {
+                useIdleLogout();
+            }
+        },
+        { immediate: true }
+    );
+
     useMeta({ title: 'Sales Admin' });
 
     const mainLayout = computed(() => {

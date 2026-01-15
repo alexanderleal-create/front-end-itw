@@ -1,24 +1,29 @@
-import axios from "axios";
+import axios from 'axios';
 
-const api=axios.create({
-    baseURL: 'http://localhost:8002/',
-    withCredentials: true,
+const api = axios.create({
+  baseURL: 'http://localhost:8000/itwframe/',
+  withCredentials: true, // 
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-api.interceptors.request.use(
-    response => response,     
-    error => {const config = error.config;
-        if (config && config.meta  && config.meta.triggeredByButton) {
-    console.log('Error lanzado desde el botón → no mostrar alerta global');
-      return Promise.reject(error); // Lo dejamos para que lo maneje el componente
+// Interceptor para manejar errores de autenticación
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token inválido o expirado - las cookies no son válidas
+      sessionStorage.removeItem('user');
+      localStorage.removeItem('token_exp');
+      
+      // Redirigir al login solo si no estamos ya ahí
+      if (window.location.pathname !== '/auth/boxed-signin') {
+        window.location.href = '/auth/boxed-signin';
+      }
     }
-    
-    else{ if(error.response && error.response.status === 401) {
-    
-      window.dispatchEvent(new CustomEvent('unauthorized',{detail:{mensaje:'No estás autorizado. Por favor, inicia sesión.'}})); // igual a cont event = new customEvent('Nombre del evento){ detail}
-    }}
     return Promise.reject(error);
-    }
+  }
 );
 
 export default api;
