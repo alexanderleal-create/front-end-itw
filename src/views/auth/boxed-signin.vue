@@ -109,12 +109,8 @@ export default defineComponent({
   },
 
   methods: {
-<<<<<<< HEAD
-    async handleLogin() {
-=======
     
      async handleLogin() {
->>>>>>> e76c674 (Correcciones Cokies)
       if (this.loading || this.isBlocked) return
 
       this.error = ''
@@ -128,11 +124,7 @@ export default defineComponent({
 
       try {
         //  El backend configura las cookies automáticamente
-<<<<<<< HEAD
-        const response = await api.post('', {
-=======
         const response = await api.post('itwframe/', {
->>>>>>> e76c674 (Correcciones Cokies)
           username: this.form.username.trim(),
           password: this.form.password,
         })

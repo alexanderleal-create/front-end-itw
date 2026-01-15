@@ -94,14 +94,6 @@ const handleLogout = async (close: Function) => {
     close();
 
     try {
-<<<<<<< HEAD
-        //  Llamar al endpoint de logout para borrar cookies del backend
-        await api.post('logout/');
-    } catch (error) {
-        console.error('Error al cerrar sesión:', error);
-        // Continuar con el logout aunque falle la llamada
-    }
-=======
 
         await api.post('/itwframe/logout/');
     } catch (error) {
@@ -110,7 +102,6 @@ const handleLogout = async (close: Function) => {
 
     sessionStorage.removeItem('user');
     localStorage.removeItem('token_exp');
->>>>>>> e76c674 (Correcciones Cokies)
 
     // Limpiar datos del frontend
     sessionStorage.removeItem('user');
