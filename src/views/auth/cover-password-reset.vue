@@ -104,42 +104,50 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { employeeService } from '@/services/employee.service'
-import type { Employee } from '@/services/employees.data'
 
-// LISTA DE USUARIOS DESDE JSON (VÍA SERVICE)
-const users = ref<Employee[]>(employeeService.getAll())
+/** ======================
+ * DATA
+ ======================= */
 
-// MODAL
+// Lista de usuarios (SIEMPRE inicializada)
+const users = ref([
+  {
+    id: 1,
+    name: 'Alexander Byron',
+    email: 'alex.byron@itw.com',
+    mustChangePassword: false,
+  },
+  {
+    id: 2,
+    name: 'María López',
+    email: 'maria.lopez@empresa.com',
+    mustChangePassword: true,
+  },
+])
+
+// Modal
 const showModal = ref(false)
 const tempPassword = ref('')
 
-// GENERAR CONTRASEÑA TEMPORAL
-const generateTempPassword = (user: Employee) => {
-  const confirmed = window.confirm(
-    `¿Estás seguro de generar una contraseña temporal para ${user.name}?`
-  )
+/** ======================
+ * MÉTODOS
+ ======================= */
 
-  if (!confirmed) return
-
-  // Password temporal simulada
+// Generar contraseña temporal
+const generateTempPassword = (user: any) => {
+  // contraseña simple de ejemplo
   tempPassword.value = Math.random().toString(36).slice(-8)
 
-  // ✅ MÉTODO CORRECTO + PARÁMETROS CORRECTOS
-  employeeService.setTemporaryPassword(
-    user.id,
-    tempPassword.value
-  )
-
-  // Reflejo inmediato en UI
+  // marcar usuario como temporal
   user.mustChangePassword = true
 
   showModal.value = true
 }
 
-// CERRAR MODAL
+// Cerrar modal
 const closeModal = () => {
   showModal.value = false
   tempPassword.value = ''
 }
 </script>
+

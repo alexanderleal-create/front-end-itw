@@ -78,19 +78,6 @@ import vue3JsonExcel from 'vue3-json-excel';
 app.use(vue3JsonExcel);
 
 // ============================
-// ✅ INICIALIZAR JSON BASE DE EMPLEADOS
-// ============================
-import { employeeService } from '@/services/employee.service';
-
-/**
- * 🔹 Esto:
- * - Carga src/data/employees.base.json
- * - Lo copia a localStorage SOLO la primera vez
- * - Luego todo el sistema usa el mismo origen
- */
-employeeService.init();
-
-// ============================
 // 🚀 MOUNT
 // ============================
 app.mount('#app');

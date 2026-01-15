@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAppStore } from '@/stores';
+<<<<<<< HEAD
 import api from '@/api/axios/axios';
 
 const routes = [
@@ -7,19 +8,47 @@ const routes = [
         path: '/',
         redirect: '/auth/boxed-signin',
         meta: { requiresAuth: false },
+=======
+
+import Dashboard from '@/views/dashboard.vue';
+import Login from '@/views/auth/boxed-signin.vue';
+
+const routes = [
+    // ================= ROOT =================
+    {
+        path: '/',
+        redirect: '/dashboard',
+>>>>>>> e76c674 (Correcciones Cokies)
     },
 
+    // ================= DASHBOARD =================
     {
         path: '/dashboard',
+<<<<<<< HEAD
         component: () => import('@/views/dashboard.vue'),
+=======
+        name: 'dashboard',
+        component: Dashboard,
+>>>>>>> e76c674 (Correcciones Cokies)
         meta: {
             requiresAuth: true,
             layout: 'app',
         },
     },
 
+<<<<<<< HEAD
+=======
+    // ================= REDIRECT LEGACY =================
+    {
+        path: '/analytics',
+        redirect: '/dashboard',
+    },
+
+    // ================= USERS =================
+>>>>>>> e76c674 (Correcciones Cokies)
     {
         path: '/users/employees',
+        name: 'users-employees',
         component: () => import('@/views/users/employees-table.vue'),
         meta: {
             requiresAuth: true,
@@ -28,7 +57,8 @@ const routes = [
     },
 
     {
-        path: '/auth/boxed-signup',
+        path: '/users/create',
+        name: 'users-create',
         component: () => import('@/views/auth/boxed-signup.vue'),
         meta: {
             requiresAuth: true,
@@ -37,7 +67,8 @@ const routes = [
     },
 
     {
-        path: '/auth/cover-password-reset',
+        path: '/users/password-reset',
+        name: 'users-password-reset',
         component: () => import('@/views/auth/cover-password-reset.vue'),
         meta: {
             requiresAuth: true,
@@ -45,21 +76,34 @@ const routes = [
         },
     },
 
+    // ================= AUTH =================
     {
         path: '/auth/boxed-signin',
+<<<<<<< HEAD
         component: () => import('@/views/auth/boxed-signin.vue'),
         meta: { 
             layout: 'auth',
             requiresAuth: false 
+=======
+        name: 'login',
+        component: Login,
+        meta: {
+            layout: 'auth',
+>>>>>>> e76c674 (Correcciones Cokies)
         },
     },
 
     {
         path: '/auth/boxed-password-reset',
         component: () => import('@/views/auth/boxed-password-reset.vue'),
+<<<<<<< HEAD
         meta: { 
             layout: 'auth',
             requiresAuth: false 
+=======
+        meta: {
+            layout: 'auth',
+>>>>>>> e76c674 (Correcciones Cokies)
         },
     },
 ];
@@ -71,6 +115,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     const store = useAppStore();
+<<<<<<< HEAD
     
     // Configurar layout
     const targetLayout = to.meta?.layout === 'auth' ? 'auth' : 'app';
@@ -114,6 +159,34 @@ router.beforeEach(async (to, from, next) => {
             store.setMainLayout('auth');
             next('/auth/boxed-signin');
         }
+=======
+
+    // Forzar layout
+    store.setMainLayout(to.meta?.layout === 'auth' ? 'auth' : 'app');
+
+    const tokenExp = localStorage.getItem('token_exp');
+
+    // Rutas protegidas
+    if (to.meta?.requiresAuth) {
+        if (!tokenExp) {
+            next('/auth/boxed-signin');
+            return;
+        }
+
+        const expDate = new Date(tokenExp);
+        const now = new Date();
+
+        if (now > expDate) {
+            localStorage.removeItem('token_exp');
+            next('/auth/boxed-signin');
+            return;
+        }
+    }
+
+    // Evitar volver al login si ya está logueado
+    if (tokenExp && to.path === '/auth/boxed-signin') {
+        next('/dashboard');
+>>>>>>> e76c674 (Correcciones Cokies)
         return;
     }
 

@@ -9,7 +9,7 @@
         <!-- Ruta -->
         <nav class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
           <router-link
-            to="/analytics"
+            to="/dashboard"
             class="hover:text-primary transition"
           >
             Dashboard
@@ -25,7 +25,7 @@
 
         <!-- Volver -->
         <router-link
-          to="/analytics"
+          to="/dashboard"
           class="text-primary font-semibold hover:underline"
         >
           Volver 

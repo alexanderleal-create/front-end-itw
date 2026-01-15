@@ -10,7 +10,7 @@
 
         <!-- HEADER -->
         <div class="flex items-center px-4 py-3">
-          <router-link to="/analytics" class="flex items-center gap-2 overflow-hidden">
+          <router-link to="/dashboard" class="flex items-center gap-2 overflow-hidden">
             <img src="/assets/images/logo.png" class="w-8 flex-none" />
 
             <span
@@ -40,7 +40,7 @@
             <!-- PANEL PRINCIPAL -->
             <li>
               <router-link
-                to="/analytics"
+                to="/dashboard"
                 class="nav-link flex items-center gap-3 px-3 py-2 rounded-md
                        hover:bg-gray-100 dark:hover:bg-[#1a233a]"
               >
@@ -76,8 +76,7 @@
               >
                 <!-- ALTA -->
                 <li>
-                  <router-link
-                    to="/auth/boxed-signup"
+                 <router-link to="/users/create"
                     class="block px-3 py-2 rounded-md
                           hover:bg-gray-100 dark:hover:bg-[#1a233a]"
                   >
@@ -100,8 +99,7 @@
 
             <!-- RECUPERACIÓN DE CONTRASEÑAS -->
             <li>
-              <router-link
-                to="/auth/cover-password-reset"
+              <router-link to="/users/password-reset" 
                 class="nav-link flex items-center gap-3 px-3 py-2 rounded-md
                       hover:bg-gray-100 dark:hover:bg-[#1a233a]"
               >
