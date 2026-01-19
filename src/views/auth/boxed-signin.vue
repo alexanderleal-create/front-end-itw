@@ -136,11 +136,12 @@ export default defineComponent({
         }
         sessionStorage.setItem('user', JSON.stringify(userData))
 
-        // ✅ Guardar expiración local (para validaciones del frontend)
-        const currentDate = new Date()
-        const expirationMinutes = 30 // Debe coincidir con ACCESS_TOKEN_LIFETIME (30 min)
-        const expirationDate = new Date(currentDate.getTime() + expirationMinutes * 60 * 1000)
-        localStorage.setItem('token_exp', expirationDate.toISOString())
+        const DateNow = new Date()
+        //  Guardar expiración local (para validaciones del frontend)
+        const currentDate = new Date(userData.exp * 1000)
+        localStorage.setItem('token_exp', currentDate.toISOString())
+
+       console.log("currentDate-DateNow)", currentDate, DateNow)
 
         Swal.fire({
           icon: 'success',
