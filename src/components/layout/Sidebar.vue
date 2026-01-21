@@ -1,21 +1,28 @@
 <template>
-  <div :class="{ 'dark text-white-dark': store.semidark }">
+  <div>
     <nav
       class="sidebar fixed top-0 bottom-0 z-50 h-full
              shadow-[5px_0_25px_0_rgba(94,92,154,0.1)]
-             transition-all duration-300"
+             transition-all duration-300
+             !bg-white dark:!bg-[#2B2B2B]"
       :class="collapsed ? 'w-[80px]' : 'w-[260px]'"
     >
-      <div class="bg-white dark:bg-[#0e1726] h-full flex flex-col">
+      <div class="h-full flex flex-col">
 
         <!-- HEADER -->
-        <div class="flex items-center px-4 py-3">
+        <div class="flex items-center px-4 py-3 border-b !border-gray-200 dark:!border-[#404040]">
           <router-link to="/dashboard" class="flex items-center gap-2 overflow-hidden">
-            <img src="/assets/images/logo.png" class="w-8 flex-none" />
+            <img 
+          src="/assets/images/logo.png" 
+          class="w-8 flex-none 
+          dark:brightness-150 dark:contrast-125 
+         dark:drop-shadow-[0_0_10px_rgba(96,165,250,0.6)]" 
+        alt="ITW"
+        />
 
             <span
               v-if="!collapsed"
-              class="text-xl font-semibold dark:text-white-light whitespace-nowrap"
+              class="text-xl font-semibold !text-black dark:!text-white whitespace-nowrap transition-opacity duration-300"
             >
               ITW
             </span>
@@ -23,11 +30,11 @@
 
           <button
             class="ml-auto w-8 h-8 rounded-full flex items-center justify-center
-                   hover:bg-gray-500/10 dark:hover:bg-dark-light/10"
+                   hover:!bg-gray-100 dark:hover:!bg-[#3A3A3A] transition-colors"
             @click="toggleCollapse"
           >
             <IconCaretsDown
-              class="transition-transform"
+              class="transition-transform !text-gray-600 dark:!text-gray-300"
               :class="{ 'rotate-180': collapsed }"
             />
           </button>
@@ -42,18 +49,33 @@
               <router-link
                 to="/dashboard"
                 class="nav-link flex items-center gap-3 px-3 py-2 rounded-md
-                       hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                       !text-gray-700 dark:!text-[#E0E0E0]
+                       hover:!bg-gray-100 dark:hover:!bg-[#3A3A3A] 
+                       hover:!text-black dark:hover:!text-white
+                       transition-colors"
+                :class="{
+                  '!bg-gray-100 dark:!bg-[#3A3A3A] !text-black dark:!text-white': 
+                  $route.path === '/dashboard'
+                }"
               >
                 <IconMenuDashboard class="shrink-0" />
                 <span v-if="!collapsed">Panel principal</span>
               </router-link>
             </li>
+
             <!-- SUBMENÚ EMPLEADOS -->
             <li>
               <button
                 type="button"
                 class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-md
-                      hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                       !text-gray-700 dark:!text-[#E0E0E0]
+                       hover:!bg-gray-100 dark:hover:!bg-[#3A3A3A]
+                       hover:!text-black dark:hover:!text-white
+                       transition-colors"
+                :class="{
+                  '!bg-gray-100 dark:!bg-[#3A3A3A] !text-black dark:!text-white': 
+                  employeesOpen
+                }"
                 @click="toggleEmployees"
               >
                 <IconMenuUsers class="shrink-0" />
@@ -76,9 +98,20 @@
               >
                 <!-- ALTA -->
                 <li>
-                 <router-link to="/users/create"
-                    class="block px-3 py-2 rounded-md
-                          hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                  <router-link 
+                    to="/users/create"
+                    class="flex items-center gap-2 px-3 py-2 rounded-md
+                           !text-gray-600 dark:!text-[#C0C0C0]
+                           hover:!bg-gray-50 dark:hover:!bg-[#383838]
+                           hover:!text-primary dark:hover:!text-primary
+                           transition-colors
+                           before:h-0.5 before:w-2 before:rounded 
+                           before:!bg-gray-300 dark:before:!bg-[#666666] 
+                           hover:before:!bg-primary"
+                    :class="{
+                      '!text-primary before:!bg-primary': 
+                      $route.path === '/users/create'
+                    }"
                   >
                     Alta de usuarios
                   </router-link>
@@ -88,8 +121,18 @@
                 <li>
                   <router-link
                     to="/users/employees"
-                    class="block px-3 py-2 rounded-md
-                          hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                    class="flex items-center gap-2 px-3 py-2 rounded-md
+                           !text-gray-600 dark:!text-[#C0C0C0]
+                           hover:!bg-gray-50 dark:hover:!bg-[#383838]
+                           hover:!text-primary dark:hover:!text-primary
+                           transition-colors
+                           before:h-0.5 before:w-2 before:rounded 
+                           before:!bg-gray-300 dark:before:!bg-[#666666] 
+                           hover:before:!bg-primary"
+                    :class="{
+                      '!text-primary before:!bg-primary': 
+                      $route.path === '/users/employees'
+                    }"
                   >
                     Tabla de Usuarios
                   </router-link>
@@ -99,9 +142,17 @@
 
             <!-- RECUPERACIÓN DE CONTRASEÑAS -->
             <li>
-              <router-link to="/users/password-reset" 
+              <router-link 
+                to="/users/password-reset" 
                 class="nav-link flex items-center gap-3 px-3 py-2 rounded-md
-                      hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                       !text-gray-700 dark:!text-[#E0E0E0]
+                       hover:!bg-gray-100 dark:hover:!bg-[#3A3A3A]
+                       hover:!text-black dark:hover:!text-white
+                       transition-colors"
+                :class="{
+                  '!bg-gray-100 dark:!bg-[#3A3A3A] !text-black dark:!text-white': 
+                  $route.path === '/users/password-reset'
+                }"
               >
                 <IconMenuLock class="shrink-0" />
                 <span v-if="!collapsed">Recuperación de contraseña</span>
@@ -114,7 +165,6 @@
     </nav>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import { ref } from 'vue';

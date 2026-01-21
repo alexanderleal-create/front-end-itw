@@ -1,24 +1,23 @@
 <template>
   <div>
-    <div class="absolute inset-0 bg-gray-100 dark:bg-[#060818]"></div>
+    <div class="absolute inset-0 !bg-gray-100 dark:!bg-[#202020]"></div>
 
     <div class="relative px-6 pt-6">
       <div
         class="mx-auto max-w-7xl flex items-center justify-between text-sm"
       >
         <!-- Ruta -->
-        <nav class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+        <nav class="flex items-center gap-2 !text-gray-600 dark:!text-gray-400">
           <router-link
             to="/dashboard"
-            class="hover:text-primary transition"
+            class="hover:!text-primary dark:hover:!text-blue-400 transition"
           >
             Dashboard
           </router-link>
 
-
           <span>/</span>
 
-          <span class="text-primary font-semibold">
+          <span class="!text-primary dark:!text-blue-400 font-semibold">
             Alta de Usuario
           </span>
         </nav>
@@ -26,7 +25,7 @@
         <!-- Volver -->
         <router-link
           to="/dashboard"
-          class="text-primary font-semibold hover:underline"
+          class="!text-primary dark:!text-blue-400 font-semibold hover:underline"
         >
           Volver 
         </router-link>
@@ -38,14 +37,14 @@
     <!-- ===================== -->
     <div class="relative flex min-h-screen items-start justify-center px-6 py-10">
       <div
-        class="w-full max-w-[520px] rounded-md bg-white/80 backdrop-blur-lg dark:bg-black/60 p-8 shadow-lg"
+        class="w-full max-w-[520px] rounded-md !bg-white dark:!bg-[#2B2B2B] p-8 shadow-2xl"
       >
         <!-- TÍTULO -->
         <div class="mb-8 text-center">
-          <h1 class="text-3xl font-extrabold uppercase text-primary">
+          <h1 class="text-3xl font-extrabold uppercase !text-primary dark:!text-blue-400">
             Alta de Usuario
           </h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="text-sm !text-gray-600 dark:!text-gray-400">
             Registro de usuarios del sistema
           </p>
         </div>
@@ -53,14 +52,14 @@
         <!-- MENSAJES -->
         <p
           v-if="error"
-          class="text-danger text-center mb-4 font-semibold"
+          class="!text-danger dark:!text-red-400 !bg-red-50 dark:!bg-red-900/20 text-center mb-4 font-semibold p-3 rounded-md"
         >
           {{ error }}
         </p>
 
         <p
           v-if="success"
-          class="text-success text-center mb-4 font-semibold"
+          class="!text-success dark:!text-green-400 !bg-green-50 dark:!bg-green-900/20 text-center mb-4 font-semibold p-3 rounded-md"
         >
           {{ success }}
         </p>
@@ -70,62 +69,94 @@
         <!-- ===================== -->
         <form class="space-y-4" @submit.prevent="handleSubmit">
 
-          <!-- NOMBRE -->
+          <!-- NOMBRE DE USUARIO -->
           <div>
-            <label class="font-semibold">Nombre de Usuario </label>
+            <label class="block mb-1.5 font-semibold !text-gray-700 dark:!text-gray-300">
+              Nombre de Usuario
+            </label>
             <input
               v-model.trim="form.username"
-              class="form-input"
+              class="form-input !bg-white dark:!bg-[#323232] 
+                     !border-gray-300 dark:!border-[#4D4D4D]
+                     !text-gray-900 dark:!text-gray-100
+                     placeholder:!text-gray-400 dark:placeholder:!text-gray-500"
               placeholder="Nombre de usuario"
             />
           </div>
 
-          <!-- APELLIDO PATERNO -->
+          <!-- NOMBRE -->
           <div>
-            <label class="font-semibold">Nombre</label>
+            <label class="block mb-1.5 font-semibold !text-gray-700 dark:!text-gray-300">
+              Nombre
+            </label>
             <input
               v-model.trim="form.first_name"
-              class="form-input"
+              class="form-input !bg-white dark:!bg-[#323232] 
+                     !border-gray-300 dark:!border-[#4D4D4D]
+                     !text-gray-900 dark:!text-gray-100
+                     placeholder:!text-gray-400 dark:placeholder:!text-gray-500"
               placeholder="Nombre(s)"
             />
           </div>
 
-          <!-- APELLIDO MATERNO -->
+          <!-- APELLIDO -->
           <div>
-            <label class="font-semibold">Apellido </label>
+            <label class="block mb-1.5 font-semibold !text-gray-700 dark:!text-gray-300">
+              Apellido
+            </label>
             <input
               v-model.trim="form.last_name"
-              class="form-input"
+              class="form-input !bg-white dark:!bg-[#323232] 
+                     !border-gray-300 dark:!border-[#4D4D4D]
+                     !text-gray-900 dark:!text-gray-100
+                     placeholder:!text-gray-400 dark:placeholder:!text-gray-500"
               placeholder="Apellido"
             />
           </div>
 
           <!-- EMAIL -->
           <div>
-            <label class="font-semibold">Correo</label>
+            <label class="block mb-1.5 font-semibold !text-gray-700 dark:!text-gray-300">
+              Correo
+            </label>
             <input
               v-model.trim="form.email"
               type="email"
-              class="form-input"
+              class="form-input !bg-white dark:!bg-[#323232] 
+                     !border-gray-300 dark:!border-[#4D4D4D]
+                     !text-gray-900 dark:!text-gray-100
+                     placeholder:!text-gray-400 dark:placeholder:!text-gray-500"
               placeholder="example@itw.com"
             />
           </div>
 
           <!-- PASSWORD -->
           <div>
-            <label class="font-semibold">Contraseña</label>
+            <label class="block mb-1.5 font-semibold !text-gray-700 dark:!text-gray-300">
+              Contraseña
+            </label>
             <input
               v-model="form.password"
               type="password"
-              class="form-input"
+              class="form-input !bg-white dark:!bg-[#323232] 
+                     !border-gray-300 dark:!border-[#4D4D4D]
+                     !text-gray-900 dark:!text-gray-100
+                     placeholder:!text-gray-400 dark:placeholder:!text-gray-500"
               placeholder="Mínimo 8 caracteres"
             />
           </div>
 
           <!-- ROL -->
           <div>
-            <label class="font-semibold">Rol</label>
-            <select v-model="form.role" class="form-select">
+            <label class="block mb-1.5 font-semibold !text-gray-700 dark:!text-gray-300">
+              Rol
+            </label>
+            <select 
+              v-model="form.role" 
+              class="form-select !bg-white dark:!bg-[#323232] 
+                     !border-gray-300 dark:!border-[#4D4D4D]
+                     !text-gray-900 dark:!text-gray-100"
+            >
               <option disabled value="">Seleccione un rol</option>
               <option value="user">Tester</option>
               <option value="staff">Owner</option>
@@ -136,18 +167,21 @@
           <!-- AUTORIZACIÓN SUPER ADMIN -->
           <div
             v-if="form.role === 'admin'"
-            class="border border-danger rounded-md p-3 bg-danger/10"
+            class="!border !border-danger dark:!border-red-500 rounded-md p-3 !bg-danger/10 dark:!bg-red-900/20"
           >
-            <label class="font-bold text-danger block mb-1">
+            <label class="font-bold !text-danger dark:!text-red-400 block mb-2">
               Autorización Super Admin
             </label>
             <input
               v-model="form.superAdminPassword"
               type="password"
-              class="form-input border-danger"
+              class="form-input !border-danger dark:!border-red-500 
+                     !bg-white dark:!bg-[#323232]
+                     !text-gray-900 dark:!text-gray-100
+                     placeholder:!text-gray-400 dark:placeholder:!text-gray-500"
               placeholder="Contraseña de Super Admin"
             />
-            <p class="text-xs text-danger mt-1">
+            <p class="text-xs !text-danger dark:!text-red-400 mt-2">
               Este rol requiere autorización especial
             </p>
           </div>
@@ -155,8 +189,9 @@
           <!-- BOTÓN -->
           <button
             type="submit"
-            class="btn btn-gradient w-full mt-4"
+            class="btn btn-gradient w-full mt-4 font-semibold uppercase"
             :disabled="loading"
+            :class="{ 'opacity-50 cursor-not-allowed': loading }"
           >
             {{ loading ? 'Guardando...' : 'Crear usuario' }}
           </button>

@@ -1,19 +1,25 @@
 <template>
     <header class="z-40">
         <div class="shadow-sm">
-            <div class="relative bg-white dark:bg-[#0e1726] flex items-center px-5 py-2.5">
+            <div class="relative !bg-white dark:!bg-[#2B2B2B] flex items-center px-5 py-2.5 transition-colors duration-300">
 
                 <div class="flex items-center gap-3">
                     <button
-                        class="lg:hidden p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                        class="lg:hidden p-2 rounded-full !bg-gray-100 dark:!bg-[#3A3A3A] hover:!text-primary transition-colors"
                         @click="store.toggleSidebar()"
                     >
-                        <IconMenu class="w-5 h-5" />
+                        <IconMenu class="w-5 h-5 !text-gray-700 dark:!text-gray-300" />
                     </button>
 
                     <router-link to="/dashboard" class="flex items-center">
-                        <img src="/assets/images/logo.png" class="w-8" />
-                        <span class="ml-2 text-xl font-semibold dark:text-white">
+                <img 
+                src="/assets/images/logo.png" 
+                class="w-8 
+                dark:brightness-150 dark:contrast-125 
+                dark:drop-shadow-[0_0_10px_rgba(96,165,250,0.6)]" 
+                alt="ITW Logo"
+                />
+                        <span class="ml-2 text-xl font-semibold !text-black dark:!text-white">
                             AUTOMATION ITW
                         </span>
                     </router-link>
@@ -21,44 +27,47 @@
 
                 <div class="ml-auto flex items-center gap-3">
 
+                    <!-- Theme Toggle -->
                     <button
                         v-if="store.theme === 'light'"
                         @click="store.toggleTheme('dark')"
-                        class="p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                        class="p-2 rounded-full !bg-gray-100 dark:!bg-[#3A3A3A] hover:!text-primary transition-colors"
                     >
-                        <IconSun />
+                        <IconSun class="!text-gray-700 dark:!text-yellow-400" />
                     </button>
 
                     <button
                         v-else-if="store.theme === 'dark'"
                         @click="store.toggleTheme('system')"
-                        class="p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                        class="p-2 rounded-full !bg-gray-100 dark:!bg-[#3A3A3A] hover:!text-primary transition-colors"
                     >
-                        <IconMoon />
+                        <IconMoon class="!text-gray-700 dark:!text-blue-400" />
                     </button>
 
                     <button
                         v-else
                         @click="store.toggleTheme('light')"
-                        class="p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
+                        class="p-2 rounded-full !bg-gray-100 dark:!bg-[#3A3A3A] hover:!text-primary transition-colors"
                     >
-                        <IconLaptop />
+                        <IconLaptop class="!text-gray-700 dark:!text-gray-300" />
                     </button>
 
+                    <!-- User Profile Dropdown -->
                     <Popper placement="bottom-end" offsetDistance="8">
                         <button class="flex items-center gap-2">
                             <img
                                 src="/assets/images/user-profile.jpeg"
-                                class="w-9 h-9 rounded-full object-cover"
+                                class="w-9 h-9 rounded-full object-cover ring-2 !ring-gray-200 dark:!ring-[#404040]"
+                                alt="User Profile"
                             />
                         </button>
 
                         <template #content="{ close }">
-                            <ul class="w-44 text-sm font-semibold dark:text-white-dark bg-white dark:bg-[#1b2e4b] rounded shadow">
+                            <ul class="w-44 text-sm font-semibold !text-gray-700 dark:!text-white !bg-white dark:!bg-[#323232] rounded shadow-lg">
 
-                                <li class="border-t border-gray-200 dark:border-white/10">
+                                <li class="border-t !border-gray-200 dark:!border-[#404040]">
                                     <button
-                                        class="flex items-center px-4 py-2 text-danger w-full hover:bg-gray-100 dark:hover:bg-white/5"
+                                        class="flex items-center px-4 py-2 !text-danger w-full hover:!bg-gray-100 dark:hover:!bg-[#3D3D3D] transition-colors"
                                         @click="handleLogout(close)"
                                     >
                                         <IconLogout class="w-4 h-4 mr-2 rotate-90" />
@@ -94,14 +103,10 @@ const handleLogout = async (close: Function) => {
     close();
 
     try {
-
         await api.post('/itwframe/logout/');
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
     }
-
-    sessionStorage.removeItem('user');
-    localStorage.removeItem('token_exp');
 
     // Limpiar datos del frontend
     sessionStorage.removeItem('user');
