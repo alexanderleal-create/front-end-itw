@@ -1,6 +1,8 @@
 import { createApp } from 'vue';
 import App from '@/App.vue';
 
+import { vuetify } from '@/components/plugins/vuetify';
+
 const app = createApp(App);
 
 // ============================
@@ -77,6 +79,9 @@ app.component('Popper', Popper);
 import vue3JsonExcel from 'vue3-json-excel';
 app.use(vue3JsonExcel);
 
+
+
+app.use(vuetify); // ⬅️ OBLIGATORIO
 // ============================
 // 🚀 MOUNT
 // ============================

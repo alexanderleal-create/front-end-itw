@@ -121,56 +121,57 @@ export default defineComponent({
         this.loading = false
         return
       }
+try {
+  // 🔐 Login
+  const response = await api.post('itwframe/', {
+    username: this.form.username.trim(),
+    password: this.form.password,
+  })
 
-      try {
-        //  El backend configura las cookies automáticamente
-        const response = await api.post('itwframe/', {
-          username: this.form.username.trim(),
-          password: this.form.password,
-        })
+  const userData = {
+    username: this.form.username,
+    exp: response.data.exp, 
+  }
 
-        // Guardar solo info del usuario (opcional, para mostrar en UI)
-        const userData = {
-          username: this.form.username,
-          exp: response.data.exp
-        }
-        sessionStorage.setItem('user', JSON.stringify(userData))
+  // UI / sesión
+  sessionStorage.setItem('user', JSON.stringify(userData))
 
-        const DateNow = new Date()
-        //  Guardar expiración local (para validaciones del frontend)
-        const currentDate = new Date(userData.exp * 1000)
-        localStorage.setItem('token_exp', currentDate.toISOString())
 
-       console.log("currentDate-DateNow)", currentDate, DateNow)
+  localStorage.setItem('token_exp', String(userData.exp))
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Bienvenido',
-          text: `Sesión iniciada como ${this.form.username}`,
-          timer: 1500,
-          showConfirmButton: false,
-        })
+  console.log(
+    '🕒 Token expira en:',
+    new Date(userData.exp * 1000).toISOString()
+  )
 
-        setTimeout(() => {
-          this.$router.push('/dashboard')
-        }, 1500)
+  Swal.fire({
+    icon: 'success',
+    title: 'Bienvenido',
+    text: `Sesión iniciada como ${this.form.username}`,
+    timer: 1500,
+    showConfirmButton: false,
+  })
 
-      } catch (err: any) {
-        if (err.response?.status === 401) {
-          this.error = 'Usuario o contraseña incorrectos'
-        } else if (err.response?.status === 403) {
-          this.isBlocked = true
-          Swal.fire({
-            icon: 'error',
-            title: 'Usuario bloqueado',
-            text: 'Tu cuenta está bloqueada. Contacta al administrador.',
-          })
-        } else {
-          this.error = 'Error al conectar con el servidor'
-        }
-      } finally {
-        this.loading = false
-      }
+  setTimeout(() => {
+    this.$router.push('/dashboard')
+  }, 1500)
+
+} catch (err: any) {
+  if (err.response?.status === 401) {
+    this.error = 'Usuario o contraseña incorrectos'
+  } else if (err.response?.status === 403) {
+    this.isBlocked = true
+    Swal.fire({
+      icon: 'error',
+      title: 'Usuario bloqueado',
+      text: 'Tu cuenta está bloqueada. Contacta al administrador.',
+    })
+  } else {
+    this.error = 'Error al conectar con el servidor'
+  }
+} finally {
+  this.loading = false
+}
     },
 
     handlePasswordReset() {
