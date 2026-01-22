@@ -3,33 +3,23 @@
 
     <!-- HEADER DE SECCIÓN -->
     <div class="mb-6">
-      <h1 class="text-2xl font-bold !text-gray-900 dark:!text-white">
-        Recuperación de contraseñas
-      </h1>
-      <p class="text-sm !text-gray-600 dark:!text-gray-400">
+      <h1 class="text-2xl font-bold">Recuperación de contraseñas</h1>
+      <p class="text-sm text-gray-500">
         Administración de accesos y contraseñas temporales
       </p>
     </div>
 
     <!-- TARJETA -->
-    <div class="!bg-white dark:!bg-[#2B2B2B] rounded-md shadow p-5">
+    <div class="bg-white dark:bg-[#0e1726] rounded-md shadow p-5">
 
       <!-- TABLA DE USUARIOS -->
       <table class="w-full border-collapse">
         <thead>
-          <tr class="!border-b !border-gray-200 dark:!border-[#404040] !bg-gray-100 dark:!bg-[#353535]">
-            <th class="p-3 text-left !text-gray-700 dark:!text-gray-200 font-semibold">
-              Empleado
-            </th>
-            <th class="p-3 text-left !text-gray-700 dark:!text-gray-200 font-semibold">
-              Correo
-            </th>
-            <th class="p-3 text-left !text-gray-700 dark:!text-gray-200 font-semibold">
-              Estado
-            </th>
-            <th class="p-3 text-left !text-gray-700 dark:!text-gray-200 font-semibold">
-              Acciones
-            </th>
+          <tr class="border-b text-left">
+            <th class="p-3">Empleado</th>
+            <th class="p-3">Correo</th>
+            <th class="p-3">Estado</th>
+            <th class="p-3">Acciones</th>
           </tr>
         </thead>
 
@@ -37,14 +27,13 @@
           <tr
             v-for="user in users"
             :key="user.id"
-            class="!border-b !border-gray-200 dark:!border-[#404040] 
-                   hover:!bg-gray-50 dark:hover:!bg-[#323232] transition-colors"
+            class="border-b hover:bg-gray-50 dark:hover:bg-[#1a233a]"
           >
-            <td class="p-3 font-medium !text-gray-900 dark:!text-gray-200">
+            <td class="p-3 font-medium">
               {{ user.name }}
             </td>
 
-            <td class="p-3 !text-gray-700 dark:!text-gray-300">
+            <td class="p-3">
               {{ user.email }}
             </td>
 
@@ -53,8 +42,8 @@
               <span
                 class="px-2 py-1 rounded text-xs font-semibold"
                 :class="user.mustChangePassword
-                  ? '!bg-yellow-100 dark:!bg-yellow-900/30 !text-yellow-700 dark:!text-yellow-400'
-                  : '!bg-green-100 dark:!bg-green-900/30 !text-green-700 dark:!text-green-400'"
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-green-100 text-green-700'"
               >
                 {{ user.mustChangePassword ? 'Contraseña temporal' : 'Activo' }}
               </span>
@@ -63,10 +52,7 @@
             <!-- ACCIONES -->
             <td class="p-3">
               <button
-                class="btn btn-sm btn-outline-primary
-                       !text-primary dark:!text-blue-400
-                       !border-primary dark:!border-blue-400
-                       hover:!bg-primary dark:hover:!bg-blue-500"
+                class="btn btn-sm btn-outline-primary"
                 @click="generateTempPassword(user)"
               >
                 Generar contraseña temporal
@@ -76,7 +62,7 @@
 
           <!-- SIN DATOS -->
           <tr v-if="users.length === 0">
-            <td colspan="4" class="p-6 text-center !text-gray-400 dark:!text-gray-500">
+            <td colspan="4" class="p-6 text-center text-gray-400">
               No hay usuarios registrados
             </td>
           </tr>
@@ -88,35 +74,25 @@
     <!-- MODAL CONTRASEÑA TEMPORAL -->
     <div
       v-if="showModal"
-      class="fixed inset-0 !bg-black/60 flex items-center justify-center z-50"
-      @click.self="closeModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
     >
-      <div class="!bg-white dark:!bg-[#2B2B2B] p-6 rounded-md w-[380px] shadow-2xl">
-        <h2 class="text-lg font-bold mb-2 !text-gray-900 dark:!text-white">
+      <div class="bg-white dark:bg-[#0e1726] p-6 rounded-md w-[380px]">
+        <h2 class="text-lg font-bold mb-2">
           Contraseña temporal creada
         </h2>
 
-        <p class="text-sm !text-gray-600 dark:!text-gray-400 mb-3">
+        <p class="text-sm text-gray-500 mb-3">
           El usuario deberá cambiarla al iniciar sesión.
         </p>
 
         <div
-          class="!bg-gray-100 dark:!bg-[#323232] 
-                 !border !border-gray-300 dark:!border-[#4D4D4D]
-                 p-3 rounded text-center font-mono text-lg 
-                 !text-gray-900 dark:!text-gray-100"
+          class="bg-gray-100 dark:bg-[#1a233a] p-3 rounded text-center font-mono text-lg"
         >
           {{ tempPassword }}
         </div>
 
-        <div class="mt-4 flex justify-end gap-2">
-          <button 
-            class="btn btn-secondary
-                   !text-gray-700 dark:!text-gray-300
-                   !border-gray-300 dark:!border-[#4D4D4D]
-                   hover:!bg-gray-100 dark:hover:!bg-[#3A3A3A]" 
-            @click="closeModal"
-          >
+        <div class="mt-4 text-right">
+          <button class="btn btn-secondary" @click="closeModal">
             Cerrar
           </button>
         </div>
@@ -174,3 +150,4 @@ const closeModal = () => {
   tempPassword.value = ''
 }
 </script>
+

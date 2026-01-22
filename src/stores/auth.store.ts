@@ -8,29 +8,16 @@ let countdownInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        accessToken: null as string | null,
+        accessToken: null as string | null, // 👈 SOLO EN MEMORIA
         showAlertExpire: false,
         canRefresh: false,
         tokenExpired: false,
-        timeRemaining: 0,
     }),
 
-    getters: {
-        // Tiempo restante formateado (ej: "0:45")
-        getRemainingFormatted(): string {
-            const mins = Math.floor(this.timeRemaining / 60);
-            const secs = this.timeRemaining % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        },
-        
-        // Porcentaje de progreso (0-100) basado en 60 segundos
-        getProgressPercentage(): number {
-            return Math.max(0, Math.min(100, (this.timeRemaining / 60) * 100));
-        }
-    },
-
     actions: {
+        // ==========================
         // REFRESH TOKEN
+        // ==========================
         async refreshToken() {
             try {
                 const response = await api.post('/itwframe/token/refresh/');
@@ -38,13 +25,15 @@ export const useAuthStore = defineStore('auth', {
 
                 const decodedToken = JSON.parse(atob(newAccessToken.split('.')[1]));
 
+                // ✅ access token SOLO en memoria
                 this.accessToken = newAccessToken;
+
+                // ✅ solo expiración en localStorage
                 localStorage.setItem('token_exp', String(decodedToken.exp));
 
                 this.showAlertExpire = false;
                 this.canRefresh = false;
                 this.tokenExpired = false;
-                this.timeRemaining = 0;
 
                 this.setupTokenExpirationWatcher();
             } catch (error) {
@@ -52,20 +41,9 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        // ACTUALIZAR TIEMPO RESTANTE
-        updateTimeRemaining() {
-            const exp = localStorage.getItem('token_exp');
-            if (!exp) {
-                this.timeRemaining = 0;
-                return;
-            }
-
-            const expMs = Number(exp) * 1000;
-            const remainingMs = Math.max(0, expMs - Date.now());
-            this.timeRemaining = Math.floor(remainingMs / 1000);
-        },
-
+        // ==========================
         // WATCHER EXPIRACIÓN
+        // ==========================
         setupTokenExpirationWatcher() {
             const exp = localStorage.getItem('token_exp');
             if (!exp) return;
@@ -80,21 +58,15 @@ export const useAuthStore = defineStore('auth', {
                 return;
             }
 
-            // Actualizar contador cada segundo
             countdownInterval = setInterval(() => {
-                this.updateTimeRemaining();
-                
-                if (this.timeRemaining <= 0) {
-                    clearInterval(countdownInterval!);
-                }
-            }, 1000);
+                const left = expMs - Date.now();
+                if (left <= 0) clearInterval(countdownInterval!);
+            }, 60000);
 
-            // Alerta 1 minuto (60000 ms) antes de expirar
             alertTimeout = setTimeout(
                 () => {
                     this.showAlertExpire = true;
                     this.canRefresh = true;
-                    this.updateTimeRemaining();
                 },
                 Math.max(remainingMs - 60000, 0),
             );
@@ -104,20 +76,24 @@ export const useAuthStore = defineStore('auth', {
             }, remainingMs);
         },
 
+        // ==========================
         // EXPIRACIÓN FINAL
+        // ==========================
         handleTokenExpired() {
             this.clearTimers();
 
+            // ❌ NO localStorage para access token
             this.accessToken = null;
             localStorage.removeItem('token_exp');
 
             this.showAlertExpire = false;
             this.canRefresh = false;
             this.tokenExpired = true;
-            this.timeRemaining = 0;
         },
 
+        // ==========================
         // LIMPIEZA TIMERS
+        // ==========================
         clearTimers() {
             if (alertTimeout) clearTimeout(alertTimeout);
             if (expireTimeout) clearTimeout(expireTimeout);

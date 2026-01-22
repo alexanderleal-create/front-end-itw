@@ -12,7 +12,7 @@
         <!-- screen loader -->
         <div
             v-show="store.isShowMainLoader"
-            class="screen_loader fixed inset-0 bg-[#fafafa] dark:bg-[#202020] z-[60] grid place-content-center animate__animated"
+            class="screen_loader fixed inset-0 bg-[#fafafa] dark:bg-[#060818] z-[60] grid place-content-center animate__animated"
         >
             <svg width="64" height="64" viewBox="0 0 135 135" xmlns="http://www.w3.org/2000/svg" fill="#4361ee">
                 <path
@@ -52,8 +52,7 @@
             <Sidebar />
             <!--  END SIDEBAR  -->
 
-            <!-- ✅ MAIN CONTENT CON DARK MODE ARREGLADO -->
-            <div class="main-content flex flex-col min-h-screen bg-[#fafafa] dark:bg-[#202020] transition-colors duration-300">
+            <div class="main-content flex flex-col min-h-screen">
 
                 <!--  BEGIN TOP NAVBAR  -->
                 <Header />
@@ -73,113 +72,57 @@
         </div>
     </div>
 
-    <!-- MODAL DE EXPIRACIÓN (aparece cuando falta 1 minuto) -->
-    <v-dialog
-        v-model="auth.showAlertExpire"
-        max-width="520"
-        persistent
-        transition="dialog-bottom-transition"
-    >
-        <v-card class="rounded-xl overflow-hidden bg-white dark:bg-[#2B2B2B]">
+<v-dialog
+    v-model="auth.showAlertExpire"
+    max-width="480"
+    persistent
+    transition="dialog-bottom-transition"
+>
+    <v-card class="rounded-xl overflow-hidden">
 
-            <!-- HEADER CON CONTADOR CIRCULAR -->
-            <v-card-title
-                class="flex items-center justify-between gap-3 px-6 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+        <!-- HEADER -->
+        <v-card-title
+            class="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+        >
+            <v-icon size="28">mdi-alert-circle-outline</v-icon>
+            <span class="text-lg font-semibold">
+                Sesión por expirar
+            </span>
+        </v-card-title>
+
+        <!-- BODY -->
+        <v-card-text class="px-6 py-6 text-gray-700 dark:text-gray-300">
+            <p class="text-base leading-relaxed">
+                Tu sesión está a punto de expirar por seguridad.
+            </p>
+
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Si no extiendes la sesión, serás redirigido al inicio de sesión automáticamente.
+            </p>
+        </v-card-text>
+
+        <!-- ACTIONS -->
+        <v-card-actions class="px-6 py-4 bg-gray-50 dark:bg-[#0e1726]">
+            <v-spacer />
+
+            <v-btn
+                v-if="auth.canRefresh"
+                color="primary"
+                variant="flat"
+                class="px-6 font-semibold"
+                @click="auth.refreshToken"
             >
-                <div class="flex items-center gap-3">
-                    <v-icon size="28">mdi-alert-circle-outline</v-icon>
-                    <span class="text-lg font-semibold">
-                        Sesión por expirar
-                    </span>
-                </div>
-                
-                <!-- CONTADOR CIRCULAR -->
-                <div class="relative w-16 h-16">
-                    <svg class="transform -rotate-90 w-16 h-16">
-                        <!-- Círculo de fondo -->
-                        <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
-                            stroke="rgba(255, 255, 255, 0.3)"
-                            stroke-width="4"
-                            fill="transparent"
-                        />
-                        <!-- Círculo de progreso -->
-                        <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
-                            stroke="white"
-                            stroke-width="4"
-                            fill="transparent"
-                            :stroke-dasharray="175.93"
-                            :stroke-dashoffset="175.93 * (1 - auth.getProgressPercentage / 100)"
-                            class="transition-all duration-1000 ease-linear"
-                            stroke-linecap="round"
-                        />
-                    </svg>
-                    <!-- Número del contador -->
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="text-lg font-bold text-white">
-                            {{ auth.timeRemaining }}
-                        </span>
-                    </div>
-                </div>
-            </v-card-title>
+                <v-icon start>mdi-refresh</v-icon>
+                Extender sesión
+            </v-btn>
+        </v-card-actions>
 
-            <!-- BODY -->
-            <v-card-text class="px-6 py-6 text-gray-700 dark:text-gray-300">
-                <p class="text-base leading-relaxed">
-                    Tu sesión está a punto de expirar por seguridad.
-                </p>
-
-                <!-- TIEMPO RESTANTE FORMATEADO -->
-                <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                            Tiempo restante:
-                        </span>
-                        <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 tabular-nums">
-                            {{ auth.getRemainingFormatted }}
-                        </span>
-                    </div>
-                    
-                    <!-- Barra de progreso -->
-                    <div class="mt-3 w-full bg-yellow-200 dark:bg-yellow-900/40 rounded-full h-2 overflow-hidden">
-                        <div 
-                            class="bg-yellow-500 dark:bg-yellow-400 h-full transition-all duration-1000 ease-linear rounded-full"
-                            :style="{ width: auth.getProgressPercentage + '%' }"
-                        ></div>
-                    </div>
-                </div>
-
-                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                    Si no extiendes la sesión, serás redirigido al inicio de sesión automáticamente.
-                </p>
-            </v-card-text>
-
-            <!-- ACTIONS -->
-            <v-card-actions class="px-6 py-4 bg-gray-50 dark:bg-[#2D2D2D]">
-                <v-spacer />
-
-                <v-btn
-                    v-if="auth.canRefresh"
-                    color="primary"
-                    variant="flat"
-                    size="large"
-                    class="px-8 font-semibold shadow-lg"
-                    @click="auth.refreshToken"
-                >
-                    <v-icon start>mdi-refresh</v-icon>
-                    Extender sesión
-                </v-btn>
-            </v-card-actions>
-
-        </v-card>
-    </v-dialog>
+    </v-card>
+</v-dialog>
 
 </template>
+
+
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
@@ -200,14 +143,18 @@ const router = useRouter();
 
 const showTopButton = ref(false);
 
+// ==========================
 // SCROLL HANDLER
+// ==========================
 const handleScroll = () => {
     showTopButton.value =
         document.body.scrollTop > 50 ||
         document.documentElement.scrollTop > 50;
 };
 
+// ==========================
 // MOUNT
+// ==========================
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
 
@@ -218,29 +165,37 @@ onMounted(() => {
 
     store.toggleMainLoader();
 
-    // Solo si hay token
+    // ⚠️ Solo si hay token
     if (localStorage.getItem('token_exp')) {
         auth.setupTokenExpirationWatcher();
     }
 });
 
+// ==========================
 // UNMOUNT
+// ==========================
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
 
-// WATCH TOKEN EXPIRADO
+// ==========================
+// WATCH → TOKEN EXPIRADO
+// ==========================
 watch(
     () => auth.tokenExpired,
     (expired) => {
         if (!expired) return;
 
-        console.warn('Sesión expirada, redirección a login');
+        console.warn('⛔ Sesión expirada → redirección a login');
+
+
         router.replace('/auth/boxed-signin');
     }
 );
 
+// ==========================
 // GO TOP
+// ==========================
 const goToTop = () => {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;

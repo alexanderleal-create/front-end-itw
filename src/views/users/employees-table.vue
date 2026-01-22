@@ -4,10 +4,8 @@
     <!-- HEADER -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold !text-gray-900 dark:!text-white">
-          Usuarios
-        </h1>
-        <p class="!text-gray-600 dark:!text-gray-400">
+        <h1 class="text-2xl font-bold">Usuarios</h1>
+        <p class="text-gray-500">
           Gestión de usuarios internos del sistema
         </p>
       </div>
@@ -18,70 +16,54 @@
     </div>
 
     <!-- TABLA -->
-    <div class="panel !bg-white dark:!bg-[#2B2B2B] overflow-x-auto">
+    <div class="card overflow-x-auto">
       <table class="table-auto w-full text-left">
         <thead>
-          <tr class="!bg-gray-100 dark:!bg-[#353535] !border-b !border-gray-200 dark:!border-[#404040]">
-            <th class="px-4 py-3 !text-gray-700 dark:!text-gray-200 font-semibold">Nombre</th>
-            <th class="px-4 py-3 !text-gray-700 dark:!text-gray-200 font-semibold">Usuario</th>
-            <th class="px-4 py-3 !text-gray-700 dark:!text-gray-200 font-semibold">Correo</th>
-            <th class="px-4 py-3 !text-gray-700 dark:!text-gray-200 font-semibold">Rol</th>
-            <th class="px-4 py-3 !text-gray-700 dark:!text-gray-200 font-semibold">Estado</th>
-            <th class="px-4 py-3 !text-gray-700 dark:!text-gray-200 font-semibold text-center">Acciones</th>
+          <tr>
+            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr 
-            v-for="u in users" 
-            :key="u.id"
-            class="!border-b !border-gray-200 dark:!border-[#404040] 
-                   hover:!bg-gray-50 dark:hover:!bg-[#323232] transition-colors"
-          >
-            <td class="px-4 py-3 font-medium !text-gray-900 dark:!text-gray-200">
+          <tr v-for="u in users" :key="u.id">
+            <td class="font-medium">
               {{ u.first_name }} {{ u.last_name }}
             </td>
 
-            <td class="px-4 py-3 !text-gray-700 dark:!text-gray-300">
-              {{ u.username }}
-            </td>
-            
-            <td class="px-4 py-3 !text-gray-700 dark:!text-gray-300">
-              {{ u.email }}
-            </td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
 
-            <td class="px-4 py-3 font-medium !text-gray-700 dark:!text-gray-300">
+            <td class="font-medium">
               {{ u.role }}
             </td>
 
-            <td class="px-4 py-3">
+            <td>
               <span
                 class="px-2 py-1 rounded text-xs font-semibold"
                 :class="u.is_active
-                  ? '!bg-green-100 dark:!bg-green-900/30 !text-green-700 dark:!text-green-400'
-                  : '!bg-red-100 dark:!bg-red-900/30 !text-red-700 dark:!text-red-400'"
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'"
               >
                 {{ u.is_active ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
 
-            <td class="px-4 py-3 text-center">
+            <td class="text-center">
               <div class="flex justify-center gap-2">
                 <button
-                  class="btn btn-outline-warning btn-sm 
-                         !text-orange-600 dark:!text-orange-400 
-                         !border-orange-600 dark:!border-orange-400
-                         hover:!bg-orange-600 dark:hover:!bg-orange-500"
+                  class="btn btn-outline-warning btn-sm"
                   @click="openEditModal(u)"
                 >
                   Editar
                 </button>
 
                 <button
-                  class="btn btn-outline-danger btn-sm
-                         !text-red-600 dark:!text-red-400
-                         !border-red-600 dark:!border-red-400
-                         hover:!bg-red-600 dark:hover:!bg-red-500"
+                  class="btn btn-outline-danger btn-sm"
                   @click="confirmDelete(u)"
                 >
                   Eliminar
@@ -91,7 +73,7 @@
           </tr>
 
           <tr v-if="users.length === 0">
-            <td colspan="6" class="text-center py-6 !text-gray-400 dark:!text-gray-500">
+            <td colspan="6" class="text-center py-6 text-gray-400">
               No hay usuarios registrados
             </td>
           </tr>
@@ -102,90 +84,54 @@
     <!-- MODAL -->
     <div
       v-if="showModal && selectedUser"
-      class="fixed inset-0 !bg-black/60 flex items-center justify-center z-50"
-      @click.self="closeModal"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
     >
-      <div class="!bg-white dark:!bg-[#2B2B2B] rounded-lg w-full max-w-md p-6 shadow-2xl">
-        <h2 class="text-lg font-bold mb-4 !text-gray-900 dark:!text-white">
+      <div class="bg-white rounded-lg w-full max-w-md p-6">
+        <h2 class="text-lg font-bold mb-4">
           Editar usuario
         </h2>
 
         <form class="space-y-4">
 
-          <div>
-            <label class="block mb-1.5 text-sm font-semibold !text-gray-700 dark:!text-gray-300">
-              Nombre
-            </label>
-            <input
-              v-model="selectedUser.first_name"
-              type="text"
-              class="form-input w-full !bg-white dark:!bg-[#323232] 
-                     !border-gray-300 dark:!border-[#4D4D4D]
-                     !text-gray-900 dark:!text-gray-100"
-              placeholder="Nombre"
-            />
-          </div>
+          <input
+            v-model="selectedUser.first_name"
+            type="text"
+            class="form-input w-full"
+            placeholder="Nombre"
+          />
 
-          <div>
-            <label class="block mb-1.5 text-sm font-semibold !text-gray-700 dark:!text-gray-300">
-              Apellido
-            </label>
-            <input
-              v-model="selectedUser.last_name"
-              type="text"
-              class="form-input w-full !bg-white dark:!bg-[#323232] 
-                     !border-gray-300 dark:!border-[#4D4D4D]
-                     !text-gray-900 dark:!text-gray-100"
-              placeholder="Apellido"
-            />
-          </div>
+          <input
+            v-model="selectedUser.last_name"
+            type="text"
+            class="form-input w-full"
+            placeholder="Apellido"
+          />
 
-          <div>
-            <label class="block mb-1.5 text-sm font-semibold !text-gray-700 dark:!text-gray-300">
-              Correo
-            </label>
-            <input
-              v-model="selectedUser.email"
-              type="email"
-              class="form-input w-full !bg-white dark:!bg-[#323232] 
-                     !border-gray-300 dark:!border-[#4D4D4D]
-                     !text-gray-900 dark:!text-gray-100"
-              placeholder="Correo"
-            />
-          </div>
+          <input
+            v-model="selectedUser.email"
+            type="email"
+            class="form-input w-full"
+            placeholder="Correo"
+          />
 
-          <div>
-            <label class="block mb-1.5 text-sm font-semibold !text-gray-700 dark:!text-gray-300">
-              Rol
-            </label>
-            <select
-              v-model="selectedUser.role"
-              class="form-select w-full !bg-white dark:!bg-[#323232] 
-                     !border-gray-300 dark:!border-[#4D4D4D]
-                     !text-gray-900 dark:!text-gray-100"
-            >
-              <option value="Admin">Admin</option>
-              <option value="Owner">Owner</option>
-              <option value="Tester">Tester</option>
-            </select>
-          </div>
+          <select
+            v-model="selectedUser.role"
+            class="form-select w-full"
+          >
+            <option value="Admin">Admin</option>
+            <option value="Owner">Owner</option>
+            <option value="Tester">Tester</option>
+          </select>
 
-          <label class="flex items-center gap-2 text-sm !text-gray-700 dark:!text-gray-300">
-            <input 
-              type="checkbox" 
-              v-model="selectedUser.is_active"
-              class="form-checkbox"
-            />
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" v-model="selectedUser.is_active" />
             Usuario activo
           </label>
 
           <div class="flex justify-end gap-2 pt-4">
             <button
               type="button"
-              class="btn btn-outline-secondary
-                     !text-gray-700 dark:!text-gray-300
-                     !border-gray-300 dark:!border-[#4D4D4D]
-                     hover:!bg-gray-100 dark:hover:!bg-[#3A3A3A]"
+              class="btn btn-outline-secondary"
               @click="closeModal"
             >
               Cancelar
@@ -270,5 +216,5 @@ const confirmUpdate = () => {
 
 const confirmDelete = (user: User) => {
   console.log('Eliminar usuario:', user)
-} 
+}
 </script>
