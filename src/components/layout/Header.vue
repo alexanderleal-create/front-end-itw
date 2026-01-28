@@ -3,6 +3,7 @@
         <div class="shadow-sm">
             <div class="relative bg-white dark:bg-[#0e1726] flex items-center px-5 py-2.5">
 
+                <!-- Logo + Sidebar toggle -->
                 <div class="flex items-center gap-3">
                     <button
                         class="lg:hidden p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary"
@@ -11,7 +12,7 @@
                         <IconMenu class="w-5 h-5" />
                     </button>
 
-                    <router-link to="/dashboard" class="flex items-center">
+                    <router-link to="/analytics" class="flex items-center">
                         <img src="/assets/images/logo.png" class="w-8" />
                         <span class="ml-2 text-xl font-semibold dark:text-white">
                             AUTOMATION ITW
@@ -19,8 +20,10 @@
                     </router-link>
                 </div>
 
+                <!-- Right actions -->
                 <div class="ml-auto flex items-center gap-3">
 
+                    <!-- Theme switch -->
                     <button
                         v-if="store.theme === 'light'"
                         @click="store.toggleTheme('dark')"
@@ -45,6 +48,7 @@
                         <IconLaptop />
                     </button>
 
+                    <!-- User menu -->
                     <Popper placement="bottom-end" offsetDistance="8">
                         <button class="flex items-center gap-2">
                             <img

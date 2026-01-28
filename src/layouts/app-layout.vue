@@ -1,131 +1,187 @@
 <template>
-    <!--  BEGIN MAIN CONTAINER  -->
-    <div class="relative">
+  <!-- BEGIN MAIN CONTAINER -->
+  <div class="relative">
 
-        <!-- sidebar menu overlay -->
-        <div
-            class="fixed inset-0 bg-[black]/60 z-50 lg:hidden"
-            :class="{ hidden: !store.sidebar }"
-            @click="store.toggleSidebar()"
-        ></div>
+    <!-- Sidebar overlay -->
+    <div
+      class="fixed inset-0 bg-black/60 z-50 lg:hidden"
+      :class="{ hidden: !store.sidebar }"
+      @click="store.toggleSidebar()"
+    ></div>
 
-        <!-- screen loader -->
-        <div
-            v-show="store.isShowMainLoader"
-            class="screen_loader fixed inset-0 bg-[#fafafa] dark:bg-[#060818] z-[60] grid place-content-center animate__animated"
+    <!-- Screen Loader -->
+    <div
+      v-show="store.isShowMainLoader"
+      class="screen_loader fixed inset-0 bg-[#fafafa] dark:bg-[#060818] z-[60] grid place-content-center animate__animated"
+    >
+      <svg width="64" height="64" viewBox="0 0 135 135" fill="#4361ee">
+        <path
+          d="M67.447 58c5.523 0 10-4.477 10-10s-4.477-10-10-10-10 4.477-10 10 4.477 10 10 10z"
         >
-            <svg width="64" height="64" viewBox="0 0 135 135" xmlns="http://www.w3.org/2000/svg" fill="#4361ee">
-                <path
-                    d="M67.447 58c5.523 0 10-4.477 10-10s-4.477-10-10-10-10 4.477-10 10 4.477 10 10 10zm9.448 9.447c0 5.523 4.477 10 10 10 5.522 0 10-4.477 10-10s-4.478-10-10-10c-5.523 0-10 4.477-10 10zm-9.448 9.448c-5.523 0-10 4.477-10 10 0 5.522 4.477 10 10 10s10-4.478 10-10c0-5.523-4.477-10-10-10zM58 67.447c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10z"
-                >
-                    <animateTransform
-                        attributeName="transform"
-                        type="rotate"
-                        from="0 67 67"
-                        to="-360 67 67"
-                        dur="2.5s"
-                        repeatCount="indefinite"
-                    />
-                </path>
-                <path
-                    d="M28.19 40.31c6.627 0 12-5.374 12-12 0-6.628-5.373-12-12-12-6.628 0-12 5.372-12 12 0 6.626 5.372 12 12 12zm30.72-19.825c4.686 4.687 12.284 4.687 16.97 0 4.686-4.686 4.686-12.284 0-16.97-4.686-4.687-12.284-4.687-16.97 0-4.687 4.686-4.687 12.284 0 16.97zm35.74 7.705c0 6.627 5.37 12 12 12 6.626 0 12-5.373 12-12 0-6.628-5.374-12-12-12-6.63 0-12 5.372-12 12zm19.822 30.72c-4.686 4.686-4.686 12.284 0 16.97 4.687 4.686 12.285 4.686 16.97 0 4.687-4.686 4.687-12.284 0-16.97-4.685-4.687-12.283-4.687-16.97 0zm-7.704 35.74c-6.627 0-12 5.37-12 12 0 6.626 5.373 12 12 12s12-5.374 12-12c0-6.63-5.373-12-12-12zm-30.72 19.822c-4.686-4.686-12.284-4.686-16.97 0-4.686 4.687-4.686 12.285 0 16.97 4.686 4.687 12.284 4.687 16.97 0 4.687-4.685 4.687-12.283 0-16.97zm-35.74-7.704c0-6.627-5.372-12-12-12-6.626 0-12 5.373-12 12s5.374 12 12 12c6.628 0 12-5.373 12-12zm-19.823-30.72c4.687-4.686 4.687-12.284 0-16.97-4.686-4.686-12.284-4.686-16.97 0-4.687 4.686-4.687 12.284 0 16.97 4.686 4.687 12.284 4.687 16.97 0z"
-                >
-                    <animateTransform
-                        attributeName="transform"
-                        type="rotate"
-                        from="0 67 67"
-                        to="360 67 67"
-                        dur="8s"
-                        repeatCount="indefinite"
-                    />
-                </path>
-            </svg>
-        </div>
-
-        <!-- BEGIN APP SETTING LAUNCHER -->
-        <Setting />
-        <!-- END APP SETTING LAUNCHER -->
-
-        <div class="main-container text-black dark:text-white-dark min-h-screen" :class="[store.navbar]">
-
-            <!--  BEGIN SIDEBAR  -->
-            <Sidebar />
-            <!--  END SIDEBAR  -->
-
-            <div class="main-content flex flex-col min-h-screen">
-
-                <!--  BEGIN TOP NAVBAR  -->
-                <Header />
-                <!--  END TOP NAVBAR  -->
-
-                <!--  BEGIN CONTENT AREA  -->
-                <div class="p-6 animation">
-                    <router-view />
-                </div>
-                <!--  END CONTENT AREA  -->
-
-                <!-- BEGIN FOOTER -->
-                <Footer />
-                <!-- END FOOTER -->
-
-            </div>
-        </div>
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from="0 67 67"
+            to="-360 67 67"
+            dur="2.5s"
+            repeatCount="indefinite"
+          />
+        </path>
+      </svg>
     </div>
 
-<v-dialog
-    v-model="auth.showAlertExpire"
-    max-width="480"
-    persistent
-    transition="dialog-bottom-transition"
->
-    <v-card class="rounded-xl overflow-hidden">
+    <!-- Back to top -->
+    <div class="fixed bottom-6 ltr:right-6 rtl:left-6 z-50">
+      <button
+        v-if="showTopButton"
+        class="btn btn-outline-primary rounded-full p-2 bg-[#fafafa] dark:bg-[#060818]"
+        @click="goToTop"
+      >
+        ↑
+      </button>
+    </div>
 
-        <!-- HEADER -->
-        <v-card-title
-            class="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+    <!-- Settings -->
+    <Setting />
+
+    <!-- Layout -->
+    <div
+      class="main-container min-h-screen text-black dark:text-white-dark"
+      :class="[store.navbar]"
+    >
+      <Sidebar />
+
+      <div class="main-content flex flex-col min-h-screen">
+        <Header />
+
+        <div class="p-6 animation">
+          <router-view></router-view>
+        </div>
+
+        <Footer />
+      </div>
+    </div>
+
+<transition name="fade">
+  <div
+    v-if="auth.showAlertExpire"
+    class="fixed inset-0 z-50 flex items-center justify-center px-4"
+  >
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+    <!-- Modal -->
+    <div
+      class="relative z-10 w-full max-w-md
+             rounded-2xl
+             bg-white dark:bg-[#0e1726]
+             shadow-2xl
+             border border-gray-100 dark:border-white/10
+             overflow-hidden"
+    >
+      <!-- Header -->
+      <div
+        class="px-6 py-4 flex items-center gap-3
+               bg-gradient-to-r from-amber-500 to-orange-500
+               text-white"
+      >
+        <span class="text-xl">⚠</span>
+        <div class="flex flex-col">
+          <span class="text-lg font-semibold leading-tight">
+            Sesión a punto de expirar
+          </span>
+          <span class="text-xs opacity-90">
+            Por motivos de seguridad
+          </span>
+        </div>
+      </div>
+
+      <div class="px-6 py-6 space-y-4 text-center">
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          Tu sesión se cerrará automáticamente si no realizas ninguna acción.
+        </p>
+
+        <div class="flex justify-center py-2">
+          <div class="relative w-28 h-28">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle
+                cx="50%"
+                cy="50%"
+                r="45"
+                class="stroke-gray-200 dark:stroke-gray-700"
+                stroke-width="8"
+                fill="transparent"
+              />
+
+              <circle
+                cx="50%"
+                cy="50%"
+                r="45"
+                :class="progressColor"
+                stroke-width="8"
+                fill="transparent"
+                stroke-linecap="round"
+                :stroke-dasharray="circleDash.circumference"
+                :stroke-dashoffset="circleDash.offset"
+                class="transition-all duration-1000 ease-linear"
+              />
+            </svg>
+
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span
+                class="text-3xl font-bold tracking-tight"
+                :class="
+                  countdown <= 10
+                    ? 'text-red-500 animate-pulse'
+                    : 'text-gray-800 dark:text-white'
+                "
+              >
+                {{ countdown }}
+              </span>
+              <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                segundos
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Puedes extender tu sesión para continuar trabajando sin interrupciones.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="px-6 py-4 flex justify-end
+               bg-gray-50 dark:bg-[#060818]
+               border-t border-gray-100 dark:border-white/10"
+      >
+        <button
+          v-if="auth.canRefresh"
+          class="px-6 py-2.5 rounded-xl font-semibold text-white
+                 bg-gradient-to-r from-indigo-500 to-blue-600
+                 hover:from-blue-600 hover:to-indigo-500
+                 transition-all duration-300
+                 shadow-lg shadow-indigo-500/30
+                 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          @click="() => {
+            stopCountdown();
+            auth.refreshToken();
+          }"
         >
-            <v-icon size="28">mdi-alert-circle-outline</v-icon>
-            <span class="text-lg font-semibold">
-                Sesión por expirar
-            </span>
-        </v-card-title>
-
-        <!-- BODY -->
-        <v-card-text class="px-6 py-6 text-gray-700 dark:text-gray-300">
-            <p class="text-base leading-relaxed">
-                Tu sesión está a punto de expirar por seguridad.
-            </p>
-
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Si no extiendes la sesión, serás redirigido al inicio de sesión automáticamente.
-            </p>
-        </v-card-text>
-
-        <!-- ACTIONS -->
-        <v-card-actions class="px-6 py-4 bg-gray-50 dark:bg-[#0e1726]">
-            <v-spacer />
-
-            <v-btn
-                v-if="auth.canRefresh"
-                color="primary"
-                variant="flat"
-                class="px-6 font-semibold"
-                @click="auth.refreshToken"
-            >
-                <v-icon start>mdi-refresh</v-icon>
-                Extender sesión
-            </v-btn>
-        </v-card-actions>
-
-    </v-card>
-</v-dialog>
-
+          Extender sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</transition>
+    <!-- END MAIN CONTAINER -->
+  </div>
 </template>
 
-
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+
 import { useRouter } from 'vue-router';
 
 import Sidebar from '@/components/layout/Sidebar.vue';
@@ -142,62 +198,91 @@ const auth = useAuthStore();
 const router = useRouter();
 
 const showTopButton = ref(false);
-
-// ==========================
-// SCROLL HANDLER
-// ==========================
 const handleScroll = () => {
     showTopButton.value =
         document.body.scrollTop > 50 ||
         document.documentElement.scrollTop > 50;
 };
 
-// ==========================
-// MOUNT
-// ==========================
+const countdown = ref(60);
+let countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+const startCountdown = () => {
+    stopCountdown();
+    countdown.value = 60;
+
+    countdownInterval = setInterval(() => {
+        countdown.value--;
+
+        if (countdown.value <= 0) {
+            stopCountdown();
+            auth.forceLogout();
+        }
+    }, 1000);
+};
+
+const stopCountdown = () => {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+};
+
+watch(
+    () => auth.showAlertExpire,
+    (visible) => {
+        if (visible) startCountdown();
+        else stopCountdown();
+    }
+);
+
+watch(
+    () => auth.tokenExpired,
+    (expired) => {
+        if (!expired) return;
+        router.replace('/auth/boxed-signin');
+    }
+);
+
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
-
-    const eleanimation = document.querySelector('.animation');
-    eleanimation?.addEventListener('animationend', () => {
-        appSetting.changeAnimation('remove');
-    });
-
     store.toggleMainLoader();
 
-    // ⚠️ Solo si hay token
     if (localStorage.getItem('token_exp')) {
         auth.setupTokenExpirationWatcher();
     }
 });
 
-// ==========================
-// UNMOUNT
-// ==========================
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
+    stopCountdown();
 });
 
-// ==========================
-// WATCH → TOKEN EXPIRADO
-// ==========================
-watch(
-    () => auth.tokenExpired,
-    (expired) => {
-        if (!expired) return;
 
-        console.warn('⛔ Sesión expirada → redirección a login');
+const TOTAL_TIME = 60;
 
+const progress = computed(() => {
+    return Math.max((countdown.value / TOTAL_TIME) * 100, 0);
+});
 
-        router.replace('/auth/boxed-signin');
-    }
-);
+const circleDash = computed(() => {
+    const radius = 45;
+    const circumference = 2 * Math.PI * radius;
+    return {
+        circumference,
+        offset: circumference - (progress.value / 100) * circumference,
+    };
+});
 
-// ==========================
-// GO TOP
-// ==========================
+const progressColor = computed(() => {
+    if (countdown.value <= 10) return 'stroke-red-500';
+    if (countdown.value <= 25) return 'stroke-yellow-400';
+    return 'stroke-green-500';
+});
+
 const goToTop = () => {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 };
 </script>
+

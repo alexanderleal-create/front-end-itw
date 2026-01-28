@@ -1,20 +1,52 @@
 import { defineStore } from 'pinia';
 import api from '@/api/axios/axios';
 
-// Timers no reactivos
+// ==========================
+// TIMERS NO REACTIVOS
+// ==========================
 let alertTimeout: ReturnType<typeof setTimeout> | null = null;
 let expireTimeout: ReturnType<typeof setTimeout> | null = null;
-let countdownInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        accessToken: null as string | null, // 👈 SOLO EN MEMORIA
+        accessToken: null as string | null, // SOLO MEMORIA
         showAlertExpire: false,
         canRefresh: false,
         tokenExpired: false,
     }),
 
     actions: {
+        // ==========================
+        // SETUP WATCHER EXPIRACIÓN
+        // ==========================
+        setupTokenExpirationWatcher() {
+            this.clearTimers();
+
+            const exp = localStorage.getItem('token_exp');
+            if (!exp) return;
+
+            const expMs = Number(exp) * 1000;
+            const now = Date.now();
+            const remainingMs = expMs - now;
+
+            if (remainingMs <= 0) {
+                this.forceLogout();
+                return;
+            }
+
+            alertTimeout = setTimeout(
+                () => {
+                    this.showAlertExpire = true;
+                    this.canRefresh = true;
+                },
+                Math.max(remainingMs - 60_000, 0),
+            );
+
+            expireTimeout = setTimeout(() => {
+                this.forceLogout();
+            }, remainingMs);
+        },
+
         // ==========================
         // REFRESH TOKEN
         // ==========================
@@ -23,13 +55,11 @@ export const useAuthStore = defineStore('auth', {
                 const response = await api.post('/itwframe/token/refresh/');
                 const newAccessToken = response.data.access;
 
-                const decodedToken = JSON.parse(atob(newAccessToken.split('.')[1]));
+                const decoded = JSON.parse(atob(newAccessToken.split('.')[1]));
 
-                // ✅ access token SOLO en memoria
                 this.accessToken = newAccessToken;
+                localStorage.setItem('token_exp', decoded.exp.toString());
 
-                // ✅ solo expiración en localStorage
-                localStorage.setItem('token_exp', String(decodedToken.exp));
 
                 this.showAlertExpire = false;
                 this.canRefresh = false;
@@ -37,54 +67,21 @@ export const useAuthStore = defineStore('auth', {
 
                 this.setupTokenExpirationWatcher();
             } catch (error) {
-                this.handleTokenExpired();
+                this.forceLogout();
             }
         },
 
-        // ==========================
-        // WATCHER EXPIRACIÓN
-        // ==========================
-        setupTokenExpirationWatcher() {
-            const exp = localStorage.getItem('token_exp');
-            if (!exp) return;
-
+        async forceLogout() {
             this.clearTimers();
 
-            const expMs = Number(exp) * 1000;
-            const remainingMs = expMs - Date.now();
-
-            if (remainingMs <= 0) {
-                this.handleTokenExpired();
-                return;
+            try {
+                await api.post('/itwframe/logout/');
+            } catch (_) {
             }
 
-            countdownInterval = setInterval(() => {
-                const left = expMs - Date.now();
-                if (left <= 0) clearInterval(countdownInterval!);
-            }, 60000);
-
-            alertTimeout = setTimeout(
-                () => {
-                    this.showAlertExpire = true;
-                    this.canRefresh = true;
-                },
-                Math.max(remainingMs - 60000, 0),
-            );
-
-            expireTimeout = setTimeout(() => {
-                this.handleTokenExpired();
-            }, remainingMs);
-        },
-
-        // ==========================
-        // EXPIRACIÓN FINAL
-        // ==========================
-        handleTokenExpired() {
-            this.clearTimers();
-
-            // ❌ NO localStorage para access token
             this.accessToken = null;
             localStorage.removeItem('token_exp');
+            sessionStorage.clear();
 
             this.showAlertExpire = false;
             this.canRefresh = false;
@@ -95,13 +92,15 @@ export const useAuthStore = defineStore('auth', {
         // LIMPIEZA TIMERS
         // ==========================
         clearTimers() {
-            if (alertTimeout) clearTimeout(alertTimeout);
-            if (expireTimeout) clearTimeout(expireTimeout);
-            if (countdownInterval) clearInterval(countdownInterval);
+            if (alertTimeout) {
+                clearTimeout(alertTimeout);
+                alertTimeout = null;
+            }
 
-            alertTimeout = null;
-            expireTimeout = null;
-            countdownInterval = null;
+            if (expireTimeout) {
+                clearTimeout(expireTimeout);
+                expireTimeout = null;
+            }
         },
     },
 });

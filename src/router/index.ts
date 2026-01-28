@@ -76,6 +76,12 @@ const routes = [
             layout: 'auth',
         },
     },
+
+    {
+        path: '/reset-password/:uid/:token',
+        name: 'ResetPassword',
+        component: () => import('@/views/auth/reset-password.vue'),
+    },
 ];
 
 const router = createRouter({

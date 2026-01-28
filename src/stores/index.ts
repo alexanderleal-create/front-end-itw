@@ -101,7 +101,7 @@ export const useAppStore = defineStore('app', {
             i18n.global.locale.value = payload;
             localStorage.setItem('i18n_locale', payload);
             this.locale = payload;
-            if(this.locale?.toLowerCase() === 'ae') {
+            if (this.locale?.toLowerCase() === 'ae') {
                 this.toggleRTL('rtl');
             } else {
                 this.toggleRTL('ltr');
