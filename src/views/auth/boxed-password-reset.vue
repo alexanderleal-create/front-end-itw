@@ -18,7 +18,7 @@
             >
                 <div class="relative flex flex-col justify-center rounded-md bg-white/60 backdrop-blur-lg dark:bg-black/50 px-6 lg:min-h-[758px] py-20">
 
-                    <!-- language -->
+                    <!-- language --> 
                     <div class="absolute top-6 end-6">
                         <Popper :placement="store.rtlClass === 'rtl' ? 'bottom-start' : 'bottom-end'" offsetDistance="8">
                             <button

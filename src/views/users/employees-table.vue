@@ -176,23 +176,17 @@ const users = ref<User[]>([])
 const selectedUser = ref<User | null>(null)
 const showModal = ref(false)
 
-/* =========================
-   MOSTRAR / OCULTAR INACTIVOS
-========================= */
+
 const showInactive = ref(false)
 
-/* =========================
-   FILTRO DE USUARIOS (CLAVE)
-========================= */
+
 const filteredUsers = computed(() => {
   return showInactive.value
     ? users.value
     : users.value.filter(u => u.is_active)
 })
 
-/* =========================
-   CARGAR USUARIOS
-========================= */
+
 const fetchUsers = async () => {
   try {
     const res = await api.get('/itwframe/manage-users/')
@@ -204,9 +198,7 @@ const fetchUsers = async () => {
   }
 }
 
-/* =========================
-   MODAL
-========================= */
+
 const openEditModal = (user: User) => {
   selectedUser.value = { ...user }
   showModal.value = true
@@ -217,9 +209,6 @@ const closeModal = () => {
   selectedUser.value = null
 }
 
-/* =========================
-   ACTUALIZAR USUARIO
-========================= */
 const confirmUpdate = async () => {
   if (!selectedUser.value) return
 
@@ -250,9 +239,6 @@ const confirmUpdate = async () => {
   }
 }
 
-/* =========================
-   DESHABILITAR (OPTIMISTIC)
-========================= */
 const confirmDisable = async (user: User) => {
   const result = await Swal.fire({
     icon: 'warning',
@@ -273,7 +259,6 @@ const confirmDisable = async (user: User) => {
       is_active: false,
     })
 
-    // 🔥 OPTIMISTIC UPDATE
     const index = users.value.findIndex(u => u.id === user.id)
     if (index !== -1) {
       users.value[index].is_active = false
@@ -293,9 +278,7 @@ const confirmDisable = async (user: User) => {
   }
 }
 
-/* =========================
-   ACTIVAR (OPTIMISTIC)
-========================= */
+
 const activateUser = async (user: User) => {
   console.log('[FRONT] Activando usuario ID:', user.id)
 

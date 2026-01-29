@@ -58,10 +58,7 @@ const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
 
-/**
- * 🔐 Tomar UID y TOKEN desde la RUTA (NO query)
- * /reset-password/:uid/:token
- */
+
 const uid = computed(() => String(route.params.uid || ''))
 const token = computed(() => String(route.params.token || ''))
 
@@ -88,19 +85,17 @@ const handleReset = async () => {
   loading.value = true
 
   try {
-    await api.post('/itwframe/password-reset-confirm/', {
-      uid: uid.value,
-      token: token.value,
+    await api.post(`/itwframe/password-reset-confirm/${uid.value}/${token.value}/`, {
       password: password.value,
     })
 
     await Swal.fire(
       'Contraseña actualizada',
       'Ahora puedes iniciar sesión',
-      'success'
+      'success' 
     )
 
-    router.push('/login')
+    router.push('/auth/boxed-signin')
   } catch (error: any) {
     Swal.fire(
       'Error',
