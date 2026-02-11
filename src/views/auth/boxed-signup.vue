@@ -6,7 +6,6 @@
     <!-- HEADER -->
     <div class="relative px-6 pt-6">
       <div class="mx-auto max-w-7xl flex items-center justify-between text-sm">
-
         <nav class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
           <router-link to="/dashboard" class="hover:text-primary transition">
             Dashboard
@@ -41,17 +40,11 @@
         </div>
 
         <!-- MENSAJES -->
-        <p
-          v-if="error"
-          class="text-danger text-center mb-4 font-semibold"
-        >
+        <p v-if="error" class="text-danger text-center mb-4 font-semibold">
           {{ error }}
         </p>
 
-        <p
-          v-if="success"
-          class="text-success text-center mb-4 font-semibold"
-        >
+        <p v-if="success" class="text-success text-center mb-4 font-semibold">
           {{ success }}
         </p>
 
@@ -59,7 +52,7 @@
         <form class="space-y-4" @submit.prevent="handleSubmit">
 
           <div>
-            <label class="block mb-1 font-semibold text-black dark:text-white-dark">
+            <label class="block mb-1 font-semibold">
               Nombre de Usuario
             </label>
             <input
@@ -70,7 +63,7 @@
           </div>
 
           <div>
-            <label class="block mb-1 font-semibold text-black dark:text-white-dark">
+            <label class="block mb-1 font-semibold">
               Nombre
             </label>
             <input
@@ -81,7 +74,7 @@
           </div>
 
           <div>
-            <label class="block mb-1 font-semibold text-black dark:text-white-dark">
+            <label class="block mb-1 font-semibold">
               Apellido
             </label>
             <input
@@ -92,7 +85,7 @@
           </div>
 
           <div>
-            <label class="block mb-1 font-semibold text-black dark:text-white-dark">
+            <label class="block mb-1 font-semibold">
               Correo
             </label>
             <input
@@ -104,7 +97,7 @@
           </div>
 
           <div>
-            <label class="block mb-1 font-semibold text-black dark:text-white-dark">
+            <label class="block mb-1 font-semibold">
               Contraseña
             </label>
             <input
@@ -113,37 +106,6 @@
               class="form-input"
               placeholder="Mínimo 8 caracteres"
             />
-          </div>
-
-          <div>
-            <label class="block mb-1 font-semibold text-black dark:text-white-dark">
-              Rol
-            </label>
-            <select v-model="form.role" class="form-select">
-              <option disabled value="">Seleccione un rol</option>
-              <option value="user">Tester</option>
-              <option value="staff">Owner</option>
-              <option value="admin">Administrador</option>
-            </select>
-          </div>
-
-          <!-- SUPER ADMIN -->
-          <div
-            v-if="form.role === 'admin'"
-            class="border border-danger rounded-md p-3 bg-danger/10"
-          >
-            <label class="block mb-1 font-bold text-danger">
-              Autorización Super Admin
-            </label>
-            <input
-              v-model="form.superAdminPassword"
-              type="password"
-              class="form-input border-danger"
-              placeholder="Contraseña de Super Admin"
-            />
-            <p class="text-xs text-danger mt-1">
-              Este rol requiere autorización especial
-            </p>
           </div>
 
           <button
@@ -160,19 +122,16 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { useMeta } from '@/composables/use-meta';
+import { reactive, ref } from 'vue'
+import { useMeta } from '@/composables/use-meta'
 import api from '@/api/axios/axios'
 
-useMeta({ title: 'Alta de usuario' });
+useMeta({ title: 'Alta de usuario' })
 
-const loading = ref(false);
-const error = ref('');
-const success = ref('');
-
-const SUPER_ADMIN_PASSWORD = 'superadmin123';
+const loading = ref(false)
+const error = ref('')
+const success = ref('')
 
 const form = reactive({
   username: '',
@@ -180,69 +139,37 @@ const form = reactive({
   last_name: '',
   email: '',
   password: '',
-  role: '',
-  superAdminPassword: '',
-});
+})
 
 const handleSubmit = async () => {
-  error.value = '';
-  success.value = '';
-  loading.value = true;
-
-  console.log('[AltaUsuario] Submit iniciado');
-  console.log('[AltaUsuario] Formulario:', { ...form });
+  error.value = ''
+  success.value = ''
+  loading.value = true
 
   try {
-
     if (
       !form.username ||
       !form.first_name ||
       !form.last_name ||
       !form.email ||
-      !form.password ||
-      !form.role
+      !form.password
     ) {
-      console.warn('[AltaUsuario] Validación fallida: campos vacíos');
-      throw new Error('Todos los campos son obligatorios');
+      throw new Error('Todos los campos son obligatorios')
     }
 
     if (!/^\S+@\S+\.\S+$/.test(form.email)) {
-      console.warn('[AltaUsuario] Email inválido:', form.email);
-      throw new Error('Correo electrónico no válido');
+      throw new Error('Correo electrónico no válido')
     }
 
     if (form.password.length < 8) {
-      console.warn('[AltaUsuario] Password muy corto');
-      throw new Error('La contraseña debe tener al menos 8 caracteres');
+      throw new Error('La contraseña debe tener al menos 8 caracteres')
     }
 
-    if (form.role === 'admin') {
-      if (!form.superAdminPassword) {
-        console.warn('[AltaUsuario] Falta password Super Admin');
-        throw new Error('Se requiere autorización de Super Admin');
-      }
-      if (form.superAdminPassword !== SUPER_ADMIN_PASSWORD) {
-        console.warn('[AltaUsuario] Password Super Admin incorrecto');
-        throw new Error('Contraseña de Super Admin incorrecta');
-      }
-    }
+    const payload = { ...form }
 
-    const payload = {
-      username: form.username,
-      first_name: form.first_name,
-      last_name: form.last_name,
-      email: form.email,
-      password: form.password,
-    }
+    const response = await api.post('/itwframe/manage-users/', payload)
 
-
-    const response = await api.post('/itwframe/manage-users/', payload);
-
-    console.log('[AltaUsuario] Respuesta backend (SUCCESS):', response);
-    console.log('[AltaUsuario] Data backend:', response.data);
-
-    success.value = `Usuario ${payload.username} creado correctamente`;
-    console.log('[AltaUsuario] Registro completado con éxito');
+    success.value = `Usuario ${payload.username} creado correctamente`
 
     Object.assign(form, {
       username: '',
@@ -250,22 +177,17 @@ const handleSubmit = async () => {
       last_name: '',
       email: '',
       password: '',
-      role: '',
-      superAdminPassword: '',
-    });
+    })
+
+    console.log('[AltaUsuario] Usuario creado:', response.data)
 
   } catch (e: any) {
-    console.error('[AltaUsuario] Error en registro:', e);
-    console.error('[AltaUsuario] Error response:', e?.response);
-
     error.value =
       e?.response?.data?.error ||
       e?.message ||
-      'Error al crear usuario';
+      'Error al crear usuario'
   } finally {
-    loading.value = false;
-    console.log('[AltaUsuario] Submit finalizado');
+    loading.value = false
   }
-};
-
+}
 </script>

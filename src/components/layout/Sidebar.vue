@@ -75,30 +75,41 @@
               />
             </button>
 
-            <ul
-              v-if="employeesOpen && !collapsed"
-              class="ml-8 mt-1 space-y-1 text-sm"
-            >
-              <li>
-                <router-link
-                  to="/users/create"
-                  class="block px-3 py-2 rounded-md
-                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
-                >
-                  Alta de usuarios
-                </router-link>
-              </li>
+                <ul
+        v-if="employeesOpen && !collapsed"
+        class="ml-8 mt-1 space-y-1 text-sm"
+      >
+        <li>
+          <router-link
+            to="/users/create"
+            class="block px-3 py-2 rounded-md
+                  hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+          >
+            Alta de usuarios
+          </router-link>
+        </li>
 
-              <li>
-                <router-link
-                  to="/users/employees"
-                  class="block px-3 py-2 rounded-md
-                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
-                >
-                  Tabla de usuarios
-                </router-link>
-              </li>
-            </ul>
+        <li>
+          <router-link
+            to="/users/employees"
+            class="block px-3 py-2 rounded-md
+                  hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+          >
+            Tabla de usuarios
+          </router-link>
+        </li>
+
+        <li>
+          <router-link
+            to="/users/roles"
+            class="block px-3 py-2 rounded-md
+                  hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+          >
+            Roles y permisos
+          </router-link>
+        </li>
+      </ul>
+
           </li>
 
           <li>

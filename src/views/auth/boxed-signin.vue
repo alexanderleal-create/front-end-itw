@@ -23,7 +23,7 @@
             type="text"
             v-model="form.username"
             class="form-input"
-            placeholder="usuario123"
+            placeholder="Ingresa tu usuario"
           />
         </div>
 

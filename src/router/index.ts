@@ -85,6 +85,15 @@ const routes = [
             layout: 'auth',
         },
     },
+    {
+        path: '/users/roles',
+        name: 'UserRoles',
+        component: () => import('@/views/users/UserRolesView.vue'),
+        meta: {
+            requiresAuth: true,
+            layout: 'app',
+        },
+    },
 ];
 
 const router = createRouter({
