@@ -166,7 +166,6 @@ import { ref, onMounted, computed } from 'vue'
 import api from '@/api/axios/axios'
 import Swal from 'sweetalert2'
 
-/* ================= TYPES ================= */
 interface User {
   id: number
   username: string
@@ -179,7 +178,6 @@ interface Role {
   name: string
 }
 
-/* ================= STATE ================= */
 const users = ref<User[]>([])
 const roles = ref<Role[]>([])
 const error = ref('')
@@ -191,7 +189,10 @@ const selectedRoleId = ref<number | ''>('')
 const loading = ref(false)
 const isSuperUser = ref(false)
 
-/* ================= HELPERS ================= */
+/* ================= SESSION CHECK ================= */
+const hasSession = () => !!sessionStorage.getItem('user')
+
+/* ================= ROLE BADGE ================= */
 const roleBadgeClass = (role: string) => {
   switch (role) {
     case 'Administrador':
@@ -205,28 +206,32 @@ const roleBadgeClass = (role: string) => {
   }
 }
 
-/* ================= COMPUTED ================= */
+/* ================= FILTER ROLES ================= */
 const filteredRoles = computed(() => {
-  if (isSuperUser.value) {
-    return roles.value
-  }
-  return roles.value.filter(
-    role => role.name !== 'Administrador'
-  )
+  return roles.value.filter(role => {
+    if (role.name === 'Superuser') return false
+    if (!isSuperUser.value && role.name === 'Administrador') return false
+    return true
+  })
 })
 
-/* ================= FETCH ================= */
+/* ================= FETCH USERS ================= */
 const fetchUsers = async () => {
+  if (!hasSession()) return
   const res = await api.get('/itwframe/roles/users/')
   users.value = res.data
 }
 
+/* ================= FETCH ROLES ================= */
 const fetchRoles = async () => {
+  if (!hasSession()) return
   const res = await api.get('/itwframe/roles/')
   roles.value = res.data
 }
 
+/* ================= FETCH CURRENT USER ================= */
 const fetchCurrentUser = async () => {
+  if (!hasSession()) return
   const res = await api.get('/itwframe/auth/me/')
   isSuperUser.value = res.data.is_superuser
 }
@@ -244,9 +249,10 @@ const closeModal = () => {
   selectedRoleId.value = ''
 }
 
-/* ================= ACTION ================= */
+/* ================= ASSIGN ROLE ================= */
 const confirmAssign = async () => {
   if (!selectedUser.value || !selectedRoleId.value) return
+  if (!hasSession()) return
 
   loading.value = true
   error.value = ''
@@ -280,6 +286,8 @@ const confirmAssign = async () => {
 
 /* ================= INIT ================= */
 onMounted(async () => {
+  if (!hasSession()) return
+
   try {
     await Promise.all([
       fetchUsers(),

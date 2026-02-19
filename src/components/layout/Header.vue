@@ -98,23 +98,21 @@ const handleLogout = async (close: Function) => {
     close();
 
     try {
-
         await api.post('/itwframe/logout/');
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
     }
 
+    // 🔥 Limpiar sesión
     sessionStorage.removeItem('user');
+    localStorage.removeItem('token');
     localStorage.removeItem('token_exp');
 
-    // Limpiar datos del frontend
-    sessionStorage.removeItem('user');
-    localStorage.removeItem('token_exp');
-
-    // Cambiar layout a auth
+    // 🔥 Cambiar layout
     store.setMainLayout('auth');
 
-    // Redirigir al login
-    await router.replace('/auth/boxed-signin');
+    // 🔥 Redirigir y destruir instancia anterior
+    window.location.replace('/auth/boxed-signin');
 };
+
 </script>

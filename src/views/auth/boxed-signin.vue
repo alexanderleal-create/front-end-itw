@@ -11,8 +11,22 @@
         </p>
       </div>
 
-      <p v-if="error" class="mb-4 text-sm text-red-600 text-center">
+      <!-- 🔴 ERROR NORMAL -->
+      <p 
+        v-if="error && !isBlocked && attemptsRemaining > 1"
+        class="mb-4 text-sm text-red-600 text-center"
+      >
         {{ error }}
+        <br />
+        Te quedan <strong>{{ attemptsRemaining }}</strong> intento(s).
+      </p>
+
+      <!-- 🟡 ÚLTIMO INTENTO -->
+      <p 
+        v-if="!isBlocked && attemptsRemaining === 1"
+        class="mb-4 text-sm text-yellow-600 font-semibold text-center"
+      >
+        ⚠️ Último intento antes de bloquear la cuenta.
       </p>
 
       <form class="space-y-5" @submit.prevent="handleLogin">
@@ -98,19 +112,21 @@ export default defineComponent({
       showPassword: false,
       isBlocked: false,
       loading: false,
+      attemptsRemaining: 5,
     }
   },
 
   watch: {
-    'form.username'(value: string) {
+    'form.username'() {
       this.error = ''
       this.isBlocked = false
+      this.attemptsRemaining = 5
     },
   },
 
   methods: {
-    
-     async handleLogin() {
+
+    async handleLogin() {
       if (this.loading || this.isBlocked) return
 
       this.error = ''
@@ -121,57 +137,103 @@ export default defineComponent({
         this.loading = false
         return
       }
-try {
- 
-  const response = await api.post('itwframe/', {
-    username: this.form.username.trim(),
-    password: this.form.password,
-  })
 
-  const userData = {
-    username: this.form.username,
-    exp: response.data.exp, 
-  }
+      try {
 
-  // UI / sesión
-  sessionStorage.setItem('user', JSON.stringify(userData))
+        const response = await api.post('itwframe/', {
+          username: this.form.username.trim(),
+          password: this.form.password,
+        })
 
+        const forcePasswordChange = response.data.forcePasswordChange || false
 
-  localStorage.setItem('token_exp', String(userData.exp))
+        const userData = {
+          username: this.form.username,
+          exp: response.data.exp,
+          forcePasswordChange
+        }
 
-  console.log(
-    '🕒 Token expira en:',
-    new Date(userData.exp * 1000).toISOString()
-  )
+        sessionStorage.setItem('user', JSON.stringify(userData))
+        localStorage.setItem('token_exp', String(userData.exp))
 
-  Swal.fire({
-    icon: 'success',
-    title: 'Bienvenido',
-    text: `Sesión iniciada como ${this.form.username}`,
-    timer: 1500,
-    showConfirmButton: false,
-  })
+        // 🔐 Cambio obligatorio
+        if (forcePasswordChange) {
 
-  setTimeout(() => {
-    this.$router.push('/dashboard')
-  }, 1500)
+          const uid = response.data.uid
+          const token = response.data.token
 
-} catch (err: any) {
-  if (err.response?.status === 401) {
-    this.error = 'Usuario o contraseña incorrectos'
-  } else if (err.response?.status === 403) {
-    this.isBlocked = true
-    Swal.fire({
-      icon: 'error',
-      title: 'Usuario bloqueado',
-      text: 'Tu cuenta está bloqueada. Contacta al administrador.',
-    })
-  } else {
-    this.error = 'Error al conectar con el servidor'
-  }
-} finally {
-  this.loading = false
-}
+          if (!uid || !token) {
+            await Swal.fire(
+              'Error',
+              'No se pudo generar el enlace de cambio.',
+              'error'
+            )
+            this.loading = false
+            return
+          }
+
+          await Swal.fire({
+            icon: 'warning',
+            title: 'Cambio obligatorio de contraseña',
+            text: 'Debes cambiar tu contraseña antes de continuar.',
+            confirmButtonText: 'Continuar'
+          })
+
+          this.$router.push(`/auth/reset-password/${uid}/${token}/`)
+          return
+        }
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Bienvenido',
+          text: `Sesión iniciada como ${this.form.username}`,
+          timer: 1500,
+          showConfirmButton: false,
+        })
+
+        this.$router.push('/dashboard')
+
+      } catch (err: any) {
+
+        const status = err.response?.status
+        const data = err.response?.data
+
+        // 🔐 Cuenta bloqueada desde backend
+        if (status === 403 && data?.locked) {
+          this.isBlocked = true
+
+          await Swal.fire({
+            icon: 'error',
+            title: 'Cuenta bloqueada',
+            text: data.error || 'Cuenta bloqueada por múltiples intentos.',
+          })
+        }
+
+        // ❌ Credenciales incorrectas
+        else if (status === 401) {
+
+          this.attemptsRemaining = data?.attempts_remaining ?? 0
+          this.error = data?.error || 'Usuario o contraseña incorrectos'
+
+          // 🔒 Solo mostramos Swal cuando ya quedó bloqueado
+          if (this.attemptsRemaining <= 0) {
+            this.isBlocked = true
+
+            await Swal.fire({
+              icon: 'error',
+              title: 'Cuenta bloqueada',
+              text: 'Has alcanzado el máximo de intentos.',
+            })
+          }
+        }
+
+        else {
+          this.error = 'Error al conectar con el servidor'
+        }
+
+      } finally {
+        this.loading = false
+      }
     },
 
     handlePasswordReset() {
@@ -187,5 +249,5 @@ try {
       this.$router.push('/auth/boxed-password-reset')
     },
   },
-}) 
+})
 </script>

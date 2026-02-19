@@ -1,31 +1,26 @@
 <template>
   <div class="p-6">
-      <nav class="mb-4 text-sm text-gray-500">
-        <ol class="flex items-center gap-1">
-          <li>
-            <router-link
-              to="/dashboard"
-              class="hover:underline"
-            >
-              Dashboard
-            </router-link>
-          </li>
 
-          <li class="mx-1">/</li>
+    <!-- Breadcrumb -->
+    <nav class="mb-4 text-sm text-gray-500">
+      <ol class="flex items-center gap-1">
+        <li>
+          <router-link to="/dashboard" class="hover:underline">
+            Dashboard
+          </router-link>
+        </li>
+        <li class="mx-1">/</li>
+        <li class="text-primary font-semibold">
+          Roles y Permisos
+        </li>
+      </ol>
+    </nav>
 
-          <li class="text-primary font-semibold">
-            Roles y Permisos
-          </li>
-        </ol>
-      </nav>
-
-   <!-- HEADER -->
+    <!-- Header -->
     <div class="mb-6 flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-extrabold text-primary uppercase">
-          Tabla de empleados
-        </h1>
-      </div>
+      <h1 class="text-2xl font-extrabold text-primary uppercase">
+        Tabla de empleados
+      </h1>
 
       <router-link
         to="/dashboard"
@@ -34,9 +29,8 @@
         Volver
       </router-link>
     </div>
-    
 
-    <!-- TOGGLE -->
+    <!-- Toggle -->
     <div class="mb-4 flex items-center gap-2">
       <input
         id="showInactive"
@@ -49,7 +43,7 @@
       </label>
     </div>
 
-    <!-- TABLA -->
+    <!-- Tabla -->
     <div class="panel table-responsive">
       <table class="table table-hover">
         <thead>
@@ -64,7 +58,7 @@
 
         <tbody>
           <tr
-            v-for="u in visibleUsers"
+            v-for="u in users"
             :key="u.id"
           >
             <td class="font-semibold">
@@ -74,7 +68,7 @@
             <td>{{ u.username }}</td>
             <td>{{ u.email || '—' }}</td>
 
-            <!-- ESTADO -->
+            <!-- Estado -->
             <td class="text-center">
               <span
                 class="badge"
@@ -86,7 +80,7 @@
               </span>
             </td>
 
-            <!-- ACCIONES -->
+            <!-- Acciones -->
             <td class="text-center">
               <div class="flex justify-center gap-2">
 
@@ -118,8 +112,8 @@
             </td>
           </tr>
 
-          <!-- EMPTY -->
-          <tr v-if="visibleUsers.length === 0">
+          <!-- Empty -->
+          <tr v-if="users.length === 0">
             <td colspan="5" class="text-center py-6 opacity-60">
               {{ showInactive
                 ? 'No hay usuarios inactivos'
@@ -127,11 +121,12 @@
               }}
             </td>
           </tr>
+
         </tbody>
       </table>
     </div>
 
-    <!-- MODAL EDITAR -->
+    <!-- Modal Editar -->
     <div
       v-if="showModal && selectedUser"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -185,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import api from '@/api/axios/axios'
 import Swal from 'sweetalert2'
 
@@ -203,21 +198,38 @@ const selectedUser = ref<User | null>(null)
 const showModal = ref(false)
 const showInactive = ref(false)
 
-const visibleUsers = computed(() => {
-  return showInactive.value
-    ? users.value.filter(u => !u.is_active) // SOLO INACTIVOS
-    : users.value.filter(u => u.is_active)  // SOLO ACTIVOS
-})
-
-
+/* ================= FETCH USERS ================= */
 const fetchUsers = async () => {
+
+  // 
+  const hasSession = sessionStorage.getItem('user')
+  if (!hasSession) return
+
   try {
-    const res = await api.get('/itwframe/manage-users/')
-    users.value = res.data.results
-  } catch (error) {
+    const status = showInactive.value ? 'inactive' : 'active'
+
+    const res = await api.get('/itwframe/manage-users/', {
+      params: { status }
+    })
+
+    if (Array.isArray(res.data)) {
+      users.value = res.data
+    } else {
+      users.value = res.data.results || []
+    }
+
+  } catch (error: any) {
+
+    if (error.response?.status === 401) return
+
     Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error')
   }
 }
+
+/* ================= WATCH TOGGLE ================= */
+watch(showInactive, () => {
+  fetchUsers()
+})
 
 /* ================= MODAL ================= */
 const openEditModal = (user: User) => {
@@ -252,12 +264,14 @@ const confirmUpdate = async () => {
 
     await fetchUsers()
     closeModal()
-  } catch {
+
+  } catch (error) {
+    console.error(error)
     Swal.fire('Error', 'No se pudo actualizar el usuario', 'error')
   }
 }
 
-/* ================= ESTADO ================= */
+/* ================= DESHABILITAR ================= */
 const confirmDisable = async (user: User) => {
   const result = await Swal.fire({
     icon: 'warning',
@@ -271,34 +285,49 @@ const confirmDisable = async (user: User) => {
 
   if (!result.isConfirmed) return
 
-  await api.put(`/itwframe/manage-users/${user.id}/`, {
-    is_active: false,
-  })
+  try {
+    await api.put(`/itwframe/manage-users/${user.id}/`, {
+      is_active: false,
+    })
 
-  user.is_active = false
+    Swal.fire({
+      icon: 'success',
+      title: 'Usuario deshabilitado',
+      timer: 1200,
+      showConfirmButton: false,
+    })
 
-  Swal.fire({
-    icon: 'success',
-    title: 'Usuario deshabilitado',
-    timer: 1200,
-    showConfirmButton: false,
-  })
+    await fetchUsers()
+
+  } catch (error) {
+    console.error(error)
+    Swal.fire('Error', 'No se pudo deshabilitar', 'error')
+  }
 }
 
+/* ================= ACTIVAR ================= */
 const activateUser = async (user: User) => {
-  await api.put(`/itwframe/manage-users/${user.id}/`, {
-    is_active: true,
-  })
+  try {
+    await api.put(`/itwframe/manage-users/${user.id}/`, {
+      is_active: true,
+    })
 
-  user.is_active = true
+    Swal.fire({
+      icon: 'success',
+      title: 'Usuario activado',
+      timer: 1200,
+      showConfirmButton: false,
+    })
 
-  Swal.fire({
-    icon: 'success',
-    title: 'Usuario activado',
-    timer: 1200,
-    showConfirmButton: false,
-  })
+    await fetchUsers()
+
+  } catch (error) {
+    console.error(error)
+    Swal.fire('Error', 'No se pudo activar', 'error')
+  }
 }
 
+/* ================= INIT ================= */
 onMounted(fetchUsers)
+
 </script>

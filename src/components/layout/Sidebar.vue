@@ -119,7 +119,7 @@
                      hover:bg-gray-100 dark:hover:bg-[#1a233a]"
             >
               <IconMenuLock />
-              <span v-if="!collapsed">Recuperación de contraseña</span>
+              <span v-if="!collapsed">Desbloqueo y Recuperacion</span>
             </router-link>
           </li>
 
