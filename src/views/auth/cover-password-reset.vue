@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="p-6">
 
     <div class="mb-6">
@@ -19,7 +19,6 @@
           <tr class="border-b text-left">
             <th class="p-3">Usuario</th>
             <th class="p-3">Correo</th>
-            <th class="p-3">Intentos</th>
             <th class="p-3">Estado</th>
             <th class="p-3">Acción</th>
           </tr>
@@ -27,17 +26,12 @@
 
         <tbody>
           <tr
-            v-for="user in users"
+            v-for="user in blockedUsers"
             :key="user.id"
             class="border-b hover:bg-gray-50 dark:hover:bg-[#1a233a]"
           >
             <td class="p-3 font-medium">{{ user.username }}</td>
             <td class="p-3">{{ user.email }}</td>
-
-            <td class="p-3 text-sm"
-                :class="user.is_blocked ? 'text-red-500 font-semibold' : 'text-gray-500'">
-              {{ user.failed_attempts }}/5
-            </td>
 
             <!-- ESTADO VISUAL -->
             <td class="p-3 text-sm">
@@ -67,9 +61,9 @@
 
           </tr>
 
-          <tr v-if="users.length === 0">
-            <td colspan="5" class="p-6 text-center text-gray-400">
-              No hay usuarios registrados
+          <tr v-if="blockedUsers.length === 0">
+            <td colspan="4" class="p-6 text-center text-gray-400">
+              No hay usuarios bloqueados
             </td>
           </tr>
 
@@ -81,21 +75,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '@/api/axios/axios'
 import Swal from 'sweetalert2'
 
+/* ================= INTERFACE ================= */
 interface User {
   id: number
   username: string
   email: string
   forcePasswordChange: boolean
   is_blocked: boolean
-  failed_attempts: number
 }
 
+/* ================= STATE ================= */
 const users = ref<User[]>([])
 const loading = ref(false)
+
+/* ================= FILTRO SOLO BLOQUEADOS ================= */
+const blockedUsers = computed(() =>
+  users.value.filter(user => user.is_blocked === true)
+)
 
 /* ================= FETCH USERS ================= */
 const fetchUsers = async () => {
@@ -118,9 +118,8 @@ const fetchUsers = async () => {
 }
 
 /* ================= BOTÓN DINÁMICO ================= */
-
 const getButtonLabel = (user: User) => {
-  if (user.is_blocked) return 'Desbloquear usuario'
+  if (user.is_blocked) return 'Desbloquear'
   if (user.forcePasswordChange) return 'Cancelar temporal'
   return 'Enviar temporal'
 }
@@ -132,49 +131,67 @@ const getButtonClass = (user: User) => {
 }
 
 /* ================= ACCIÓN PRINCIPAL ================= */
-
 const handleSecurityAction = async (user: User) => {
   try {
 
+    /* ================= PETICIÓN ================= */
     const response = await api.post(
       `/itwframe/admin/users/${user.id}/force-password-change/`
     )
 
     const action = response.data.action
 
-    let message = ''
+    /* ================= MENSAJES MEJORADOS ================= */
+    let title = ''
+    let text = ''
+    let icon: any = 'success'
 
-    if (action === 'unlocked') {
-      message = 'Usuario desbloqueado correctamente'
+    if (action === 'unlocked_with_temporary') {
+      title = 'Usuario desbloqueado'
+      text = 'La cuenta fue reactivada y se envió una contraseña temporal al correo registrado.'
     }
 
-    if (action === 'temporary_sent') {
-      message = 'Contraseña temporal enviada'
+    else if (action === 'unlocked') {
+      title = 'Cuenta reactivada'
+      text = 'El usuario fue desbloqueado exitosamente y puede iniciar sesión nuevamente.'
     }
 
-    if (action === 'temporary_cancelled') {
-      message = 'Contraseña temporal cancelada'
+    else if (action === 'temporary_sent') {
+      title = 'Contraseña temporal enviada'
+      text = 'Se generó una nueva contraseña temporal y fue enviada al correo del usuario.'
+    }
+
+    else if (action === 'temporary_cancelled') {
+      title = 'Contraseña temporal cancelada'
+      text = 'El usuario ya no está obligado a cambiar su contraseña en el próximo inicio de sesión.'
+      icon = 'info'
     }
 
     await Swal.fire({
-      icon: 'success',
-      title: message,
-      timer: 1500,
-      showConfirmButton: false,
+      icon,
+      title,
+      text,
+      confirmButtonColor: '#3085d6',
     })
 
     await fetchUsers()
 
   } catch (error: any) {
 
-    Swal.fire(
-      'Error',
-      error.response?.data?.error || 'No se pudo ejecutar la acción',
-      'error'
-    )
+    let errorMessage =
+      error.response?.data?.error ||
+      error.response?.data?.detail ||
+      'Ocurrió un problema al ejecutar la acción de seguridad.'
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de seguridad',
+      text: errorMessage,
+      confirmButtonColor: '#d33',
+    })
   }
 }
-
+/* ================= INIT ================= */
 onMounted(() => {
   fetchUsers()
 })
