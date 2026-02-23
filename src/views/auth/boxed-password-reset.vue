@@ -1,131 +1,147 @@
 <template>
-    <div>
-        <div class="absolute inset-0">
-            <img src="/assets/images/auth/bg-gradient.png" alt="image" class="h-full w-full object-cover" />
+  <div class="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-[#060818] px-6">
+    <div class="w-full max-w-[440px] rounded-md bg-white/80 dark:bg-black/50 backdrop-blur-lg p-8">
+
+      <!-- HEADER -->
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-extrabold uppercase text-primary">
+          Recuperar contraseña
+        </h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Ingresa tu correo para recibir instrucciones
+        </p>
+      </div>
+
+      <!--  ÉXITO -->
+      <div
+        v-if="emailSent"
+        class="mb-6 rounded-md bg-green-50 border border-green-200 p-4 text-center dark:bg-green-900/20 dark:border-green-700"
+      >
+        <p class="text-green-700 dark:text-green-400 font-semibold text-sm">
+           Correo enviado exitosamente.
+        </p>
+        <p class="text-green-600 dark:text-green-500 text-xs mt-1">
+          Revisa tu bandeja de entrada y sigue las instrucciones.
+        </p>
+      </div>
+
+      <!--  ERROR -->
+      <p
+        v-if="error"
+        class="mb-4 text-sm text-red-600 text-center"
+      >
+        {{ error }}
+      </p>
+
+      <!-- FORMULARIO -->
+      <form v-if="!emailSent" class="space-y-5" @submit.prevent="handleReset">
+
+        <div>
+          <label class="block text-sm mb-1">Correo electrónico</label>
+          <input
+            type="email"
+            v-model="form.email"
+            class="form-input"
+            placeholder="correo@ejemplo.com"
+            :disabled="loading"
+          />
         </div>
 
-        <div
-            class="relative flex min-h-screen items-center justify-center bg-[url(/assets/images/auth/map.png)] bg-cover bg-center bg-no-repeat px-6 py-10 dark:bg-[#060818] sm:px-16"
+        <button
+          type="submit"
+          class="btn btn-gradient w-full uppercase"
+          :disabled="loading"
         >
-            <!-- decoraciones -->
-            <img src="/assets/images/auth/coming-soon-object1.png" class="absolute left-0 top-1/2 h-full max-h-[893px] -translate-y-1/2" />
-            <img src="/assets/images/auth/coming-soon-object2.png" class="absolute left-24 top-0 h-40 md:left-[30%]" />
-            <img src="/assets/images/auth/coming-soon-object3.png" class="absolute right-0 top-0 h-[300px]" />
-            <img src="/assets/images/auth/polygon-object.svg" class="absolute bottom-0 end-[28%]" />
+          {{ loading ? 'Enviando...' : 'Enviar instrucciones' }}
+        </button>
 
-            <div
-                class="relative w-full max-w-[870px] rounded-md bg-[linear-gradient(45deg,#fff9f9_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,0)_75%,_#fff9f9_100%)] p-2 dark:bg-[linear-gradient(52.22deg,#0E1726_0%,rgba(14,23,38,0)_18.66%,rgba(14,23,38,0)_51.04%,rgba(14,23,38,0)_80.07%,#0E1726_100%)]"
-            >
-                <div class="relative flex flex-col justify-center rounded-md bg-white/60 backdrop-blur-lg dark:bg-black/50 px-6 lg:min-h-[758px] py-20">
+      </form>
 
+      <!-- VOLVER AL LOGIN -->
+      <div class="mt-6 text-center text-sm">
+        <button
+          type="button"
+          class="text-primary hover:underline"
+          @click="$router.push('/auth/boxed-signin')"
+        >
+           Volver al inicio de sesión
+        </button>
+      </div>
 
-                    <!-- form -->
-                    <div class="mx-auto w-full max-w-[440px]">
-                        <div class="mb-7 text-center">
-                            <h1 class="mb-3 text-2xl font-bold dark:text-white">Recuperar contraseña</h1>
-                            <p class="text-white-dark">
-                                Ingresa tu correo y te enviaremos instrucciones
-                            </p>
-                        </div>
-
-                        <form class="space-y-5" @submit.prevent="handleSubmit">
-                            <div>
-                                <label class="dark:text-white">Correo electrónico</label>
-                                <div class="relative text-white-dark">
-                                    <input
-                                        v-model="email"
-                                        type="email"
-                                        placeholder="correo@ejemplo.com"
-                                        class="form-input ps-10"
-                                        :disabled="loading"
-                                    />
-                                    <span class="absolute start-4 top-1/2 -translate-y-1/2">
-                                        <icon-mail />
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                class="btn btn-gradient w-full uppercase"
-                                :disabled="loading"
-                            >
-                                <span v-if="!loading">Recuperar</span>
-                                <span v-else>Enviando...</span>
-                            </button>
-
-                            <div class="text-center">
-                                <RouterLink
-                                    :to="{ name: 'login' }"
-                                    class="text-primary hover:underline"
-                                >
-                                    Volver al login
-                                </RouterLink>
-
-                            </div>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-        </div>
     </div>
+  </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { useMeta } from '@/composables/use-meta'
+import api from '@/api/axios/axios'
 import Swal from 'sweetalert2'
 
-import api from '@/api/axios/axios'
-import { useAppStore } from '@/stores/index'
-import { useMeta } from '@/composables/use-meta'
+export default defineComponent({
+  name: 'PasswordReset',
 
-import IconMail from '@/components/icon/icon-mail.vue'
+  setup() {
+    useMeta({ title: 'Recuperar contraseña' })
+  },
 
-useMeta({ title: 'Recuperar contraseña' })
-
-const router = useRouter()
-const store = useAppStore()
-const i18n = reactive(useI18n())
-
-const email = ref('')
-const loading = ref(false)
-
-const handleSubmit = async () => {
-    if (!email.value) {
-        Swal.fire('Error', 'Debes ingresar un correo', 'error')
-        return
+  data() {
+    return {
+      form: {
+        email: '',
+      },
+      error: '',
+      loading: false,
+      emailSent: false,
     }
+  },
 
-    if (!/^\S+@\S+\.\S+$/.test(email.value)) {
-        Swal.fire('Error', 'Correo no válido', 'error')
+  methods: {
+    async handleReset() {
+      this.error = ''
+
+      if (!this.form.email) {
+        this.error = 'Debes ingresar tu correo electrónico.'
         return
-    }
+      }
 
-    loading.value = true
+      this.loading = true
 
-    try {
-        await api.post('/itwframe/password-reset/', {
-            email: email.value,
+      try {
+       await api.post('itwframe/password-reset/', {
+          email: this.form.email.trim(),
         })
 
-        Swal.fire(
-            'Correo enviado',
-            'Si el correo existe, recibirás instrucciones',
-            'success'
-        )
+        this.emailSent = true
 
-        email.value = ''
-    } catch (error) {
-        Swal.fire(
-            'Error',
-            'No se pudo procesar la solicitud',
-            'error'
-        )
-    } finally {
-        loading.value = false
-    }
-}
+        await Swal.fire({
+          icon: 'success',
+          title: 'Correo enviado',
+          text: 'Revisa tu bandeja de entrada para continuar.',
+          timer: 3000,
+          showConfirmButton: false,
+        })
+
+      } catch (err: any) {
+        const status = err.response?.status
+        const data = err.response?.data
+
+        if (status === 404) {
+          this.error = data?.error || 'No existe una cuenta con ese correo.'
+        } else if (status === 403) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Cuenta bloqueada',
+            text: data?.error || 'No puedes recuperar la contraseña de una cuenta bloqueada.',
+          })
+        } else {
+          this.error = 'Error al conectar con el servidor. Intenta más tarde.'
+        }
+
+      } finally {
+        this.loading = false
+      }
+    },
+  },
+})
 </script>
