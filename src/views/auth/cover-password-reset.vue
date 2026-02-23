@@ -1,4 +1,4 @@
-<template> 
+<template>
   <div class="p-6">
 
     <div class="mb-6">
@@ -26,47 +26,43 @@
 
         <tbody>
           <tr
-            v-for="user in blockedUsers"
+            v-for="user in users"
             :key="user.id"
             class="border-b hover:bg-gray-50 dark:hover:bg-[#1a233a]"
           >
             <td class="p-3 font-medium">{{ user.username }}</td>
             <td class="p-3">{{ user.email }}</td>
 
-            <!-- ESTADO VISUAL -->
             <td class="p-3 text-sm">
               <span v-if="user.is_blocked" class="text-red-600 font-semibold">
                 Bloqueado
               </span>
-
               <span v-else-if="user.forcePasswordChange" class="text-yellow-600 font-semibold">
                 Temporal Activa
               </span>
-
               <span v-else class="text-green-600 font-semibold">
                 Activo
               </span>
             </td>
 
-            <!-- BOTÓN DINÁMICO -->
             <td class="p-3">
               <button
                 class="btn btn-sm"
                 :class="getButtonClass(user)"
+                :disabled="actionLoading === user.id"
                 @click="handleSecurityAction(user)"
               >
-                {{ getButtonLabel(user) }}
+                <span v-if="actionLoading === user.id">Procesando...</span>
+                <span v-else>{{ getButtonLabel(user) }}</span>
               </button>
             </td>
-
           </tr>
 
-          <tr v-if="blockedUsers.length === 0">
+          <tr v-if="users.length === 0">
             <td colspan="4" class="p-6 text-center text-gray-400">
-              No hay usuarios bloqueados
+              No hay usuarios registrados
             </td>
           </tr>
-
         </tbody>
       </table>
     </div>
@@ -75,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import api from '@/api/axios/axios'
 import Swal from 'sweetalert2'
 
@@ -91,27 +87,17 @@ interface User {
 /* ================= STATE ================= */
 const users = ref<User[]>([])
 const loading = ref(false)
-
-/* ================= FILTRO SOLO BLOQUEADOS ================= */
-const blockedUsers = computed(() =>
-  users.value.filter(user => user.is_blocked === true)
-)
+const actionLoading = ref<number | null>(null)
 
 /* ================= FETCH USERS ================= */
 const fetchUsers = async () => {
   try {
     loading.value = true
-    const response = await api.get('/itwframe/roles/users/')
+    const response = await api.get('itwframe/roles/users/')
     users.value = response.data
   } catch (error: any) {
-
     if (error.response?.status === 401) return
-
-    Swal.fire(
-      'Error',
-      error.response?.data?.error || 'No se pudieron cargar los usuarios',
-      'error'
-    )
+    Swal.fire('Error', error.response?.data?.error || 'No se pudieron cargar los usuarios', 'error')
   } finally {
     loading.value = false
   }
@@ -133,64 +119,54 @@ const getButtonClass = (user: User) => {
 /* ================= ACCIÓN PRINCIPAL ================= */
 const handleSecurityAction = async (user: User) => {
   try {
+    actionLoading.value = user.id
 
-    /* ================= PETICIÓN ================= */
+    // ✅ response guardado + endpoint correcto
     const response = await api.post(
-      `/itwframe/admin/users/${user.id}/force-password-change/`
+      `itwframe/admin/users/${user.id}/force-password-change/`
     )
 
-    const action = response.data.action
+    const action: string = response.data.action
 
-    /* ================= MENSAJES MEJORADOS ================= */
-    let title = ''
-    let text = ''
-    let icon: any = 'success'
-
-    if (action === 'unlocked_with_temporary') {
-      title = 'Usuario desbloqueado'
-      text = 'La cuenta fue reactivada y se envió una contraseña temporal al correo registrado.'
+    const messages: Record<string, { title: string; text: string; icon: 'success' | 'info' }> = {
+      unlocked: {
+        title: 'Cuenta reactivada',
+        text: 'El usuario fue desbloqueado y puede iniciar sesión nuevamente.',
+        icon: 'success',
+      },
+      temporary_cancelled: {
+        title: 'Contraseña temporal cancelada',
+        text: 'El usuario ya no está obligado a cambiar su contraseña.',
+        icon: 'info',
+      },
+      temporary_sent: {
+        title: 'Contraseña temporal enviada',
+        text: 'Se generó una contraseña temporal y fue enviada al correo del usuario.',
+        icon: 'success',
+      },
     }
 
-    else if (action === 'unlocked') {
-      title = 'Cuenta reactivada'
-      text = 'El usuario fue desbloqueado exitosamente y puede iniciar sesión nuevamente.'
+    const msg = messages[action] ?? {
+      title: 'Acción completada',
+      text: response.data.message || '',
+      icon: 'success' as const,
     }
 
-    else if (action === 'temporary_sent') {
-      title = 'Contraseña temporal enviada'
-      text = 'Se generó una nueva contraseña temporal y fue enviada al correo del usuario.'
-    }
-
-    else if (action === 'temporary_cancelled') {
-      title = 'Contraseña temporal cancelada'
-      text = 'El usuario ya no está obligado a cambiar su contraseña en el próximo inicio de sesión.'
-      icon = 'info'
-    }
-
-    await Swal.fire({
-      icon,
-      title,
-      text,
-      confirmButtonColor: '#3085d6',
-    })
-
+    await Swal.fire({ ...msg, confirmButtonColor: '#3085d6' })
     await fetchUsers()
 
   } catch (error: any) {
-
-    let errorMessage =
-      error.response?.data?.error ||
-      error.response?.data?.detail ||
-      'Ocurrió un problema al ejecutar la acción de seguridad.'
-
     Swal.fire({
       icon: 'error',
       title: 'Error de seguridad',
-      text: errorMessage,
+      text: error.response?.data?.error || error.response?.data?.detail || 'Ocurrió un problema.',
       confirmButtonColor: '#d33',
     })
+  } finally {
+    actionLoading.value = null
   }
 }
+
 /* ================= INIT ================= */
 onMounted(() => {
   fetchUsers()

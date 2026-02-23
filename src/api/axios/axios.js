@@ -8,22 +8,34 @@ const api = axios.create({
   },
 });
 
+// ================= REQUEST =================
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token');
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
-  return config
-})
+  return config;
+});
 
-
+// ================= RESPONSE =================
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
 
+    // Rutas que usan 401 como respuesta normal (no son sesión expirada)
+    const ignorar401 = [
+      'itwframe/',           // login
+      'password-reset',      // recuperación de contraseña
+      'password-reset-confirm', // confirmación de nueva contraseña
+    ];
+
+    const url = error.config?.url || '';
+    const es401 = error.response?.status === 401;
+    const esRutaIgnorada = ignorar401.some(ruta => url.includes(ruta));
+
+    if (es401 && !esRutaIgnorada) {
       sessionStorage.removeItem('user');
       localStorage.removeItem('token_exp');
 
