@@ -5,7 +5,6 @@
            shadow-[5px_0_25px_0_rgba(94,92,154,0.1)]"
     :class="collapsed ? 'w-[80px]' : 'w-[260px]'"
   >
-    <!-- 🔥 AQUÍ ESTÁ LA CLAVE -->
     <div
       class="h-full flex flex-col
              bg-white dark:bg-[#0e1726]
@@ -46,6 +45,7 @@
       <perfect-scrollbar class="flex-1">
         <ul class="p-3 space-y-1 font-semibold">
 
+          <!-- DASHBOARD -->
           <li>
             <router-link
               to="/dashboard"
@@ -58,6 +58,7 @@
             </router-link>
           </li>
 
+          <!-- ================= USUARIOS ================= -->
           <li>
             <button
               class="w-full flex items-center gap-3 px-3 py-2 rounded-md
@@ -75,43 +76,87 @@
               />
             </button>
 
-                <ul
-        v-if="employeesOpen && !collapsed"
-        class="ml-8 mt-1 space-y-1 text-sm"
-      >
-        <li>
-          <router-link
-            to="/users/create"
-            class="block px-3 py-2 rounded-md
-                  hover:bg-gray-100 dark:hover:bg-[#1a233a]"
-          >
-            Alta de usuarios
-          </router-link>
-        </li>
+            <ul
+              v-if="employeesOpen && !collapsed"
+              class="ml-8 mt-1 space-y-1 text-sm"
+            >
+              <li>
+                <router-link
+                  to="/users/create"
+                  class="block px-3 py-2 rounded-md
+                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                >
+                  Alta de usuarios
+                </router-link>
+              </li>
 
-        <li>
-          <router-link
-            to="/users/employees"
-            class="block px-3 py-2 rounded-md
-                  hover:bg-gray-100 dark:hover:bg-[#1a233a]"
-          >
-            Tabla de usuarios
-          </router-link>
-        </li>
+              <li>
+                <router-link
+                  to="/users/employees"
+                  class="block px-3 py-2 rounded-md
+                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                >
+                  Tabla de usuarios
+                </router-link>
+              </li>
 
-        <li>
-          <router-link
-            to="/users/roles"
-            class="block px-3 py-2 rounded-md
-                  hover:bg-gray-100 dark:hover:bg-[#1a233a]"
-          >
-            Roles y permisos
-          </router-link>
-        </li>
-      </ul>
-
+              <li>
+                <router-link
+                  to="/users/roles"
+                  class="block px-3 py-2 rounded-md
+                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                >
+                  Roles y permisos
+                </router-link>
+              </li>
+            </ul>
           </li>
 
+          <!-- ================= PROYECTOS (NUEVO) ================= -->
+          <li>
+            <button
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-md
+                     hover:bg-gray-100 dark:hover:bg-[#1a233a]
+                     transition-colors"
+              @click="toggleProjects"
+            >
+              <IconMenuScrumboard />
+              <span v-if="!collapsed" class="flex-1 text-left">
+                Proyectos
+              </span>
+              <IconCaretsDown
+                v-if="!collapsed"
+                :class="{ 'rotate-180': projectsOpen }"
+              />
+            </button>
+
+            <ul
+              v-if="projectsOpen && !collapsed"
+              class="ml-8 mt-1 space-y-1 text-sm"
+            >
+              <li>
+                <router-link
+                  to="/project"
+                  class="block px-3 py-2 rounded-md
+                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                >
+                  Tabla de proyectos
+                </router-link>
+              </li>
+
+              <li>
+                <router-link
+                  to="/project/create"
+                  class="block px-3 py-2 rounded-md
+                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
+                >
+                  Crear proyecto
+                </router-link>
+              </li>
+            </ul>
+          </li>
+
+          <!-- ================= SEGURIDAD ================= -->
           <li>
             <router-link
               to="/users/password-reset"
@@ -119,7 +164,9 @@
                      hover:bg-gray-100 dark:hover:bg-[#1a233a]"
             >
               <IconMenuLock />
-              <span v-if="!collapsed">Desbloqueo y Recuperacion</span>
+              <span v-if="!collapsed">
+                Desbloqueo y Recuperacion
+              </span>
             </router-link>
           </li>
 
@@ -139,19 +186,30 @@ import IconMenuDashboard from '@/components/icon/menu/icon-menu-dashboard.vue';
 import IconMenuUsers from '@/components/icon/menu/icon-menu-users.vue';
 import IconMenuLock from '@/components/icon/menu/icon-menu-authentication.vue';
 
+
 const store = useAppStore();
 
 const collapsed = ref(false);
 const employeesOpen = ref(false);
+const projectsOpen = ref(false);
 
 const toggleCollapse = () => {
   collapsed.value = !collapsed.value;
   employeesOpen.value = false;
+  projectsOpen.value = false;
 };
 
 const toggleEmployees = () => {
   if (!collapsed.value) {
     employeesOpen.value = !employeesOpen.value;
+    projectsOpen.value = false;
+  }
+};
+
+const toggleProjects = () => {
+  if (!collapsed.value) {
+    projectsOpen.value = !projectsOpen.value;
+    employeesOpen.value = false;
   }
 };
 </script>

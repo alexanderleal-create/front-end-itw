@@ -94,6 +94,18 @@ const routes = [
             layout: 'app',
         },
     },
+    {
+        path: '/project/create',
+        name: 'ProyectoCrear',
+        component: () => import('@/views/project/CreateProyect.vue'),
+        meta: { requiresAuth: true, layout: 'app' },
+    },
+    {
+        path: '/project',
+        name: 'ProyectoTabla',
+        component: () => import('@/views/project/ViewProyect.vue'),
+        meta: { requiresAuth: true, layout: 'app' },
+    },
 ];
 
 const router = createRouter({
