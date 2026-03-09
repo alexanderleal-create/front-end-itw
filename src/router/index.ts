@@ -1,150 +1,214 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAppStore } from '@/stores';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAppStore } from '@/stores'
+import api from '@/api/axios/axios'
 
-import Dashboard from '@/views/dashboard.vue';
-import Login from '@/views/auth/boxed-signin.vue';
+import Dashboard from '@/views/dashboard.vue'
+import Login from '@/views/auth/boxed-signin.vue'
 
 const routes = [
-    // ================= ROOT =================
-    {
-        path: '/',
-        redirect: '/dashboard',
-    },
 
-    // ================= DASHBOARD =================
-    {
-        path: '/dashboard',
-        name: 'dashboard',
-        component: Dashboard,
-        meta: {
-            requiresAuth: true,
-            layout: 'app',
-        },
-    },
+{
+path: '/',
+redirect: '/dashboard',
+},
 
-    // ================= REDIRECT LEGACY =================
-    {
-        path: '/analytics',
-        redirect: '/dashboard',
-    },
+{
+path: '/dashboard',
+name: 'dashboard',
+component: Dashboard,
+meta:{
+requiresAuth:true,
+layout:'app'
+}
+},
 
-    // ================= USERS =================
-    {
-        path: '/users/employees',
-        name: 'users-employees',
-        component: () => import('@/views/users/employees-table.vue'),
-        meta: {
-            requiresAuth: true,
-            layout: 'app',
-        },
-    },
+{
+path: '/analytics',
+redirect: '/dashboard',
+},
 
-    {
-        path: '/users/create',
-        name: 'users-create',
-        component: () => import('@/views/auth/boxed-signup.vue'),
-        meta: {
-            requiresAuth: true,
-            layout: 'app',
-        },
-    },
+// ================= USERS =================
 
-    {
-        path: '/users/password-reset',
-        name: 'users-password-reset',
-        component: () => import('@/views/auth/cover-password-reset.vue'),
-        meta: {
-            requiresAuth: true,
-            layout: 'app',
-        },
-    },
+{
+path: '/users/employees',
+component: () => import('@/views/users/employees-table.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador','Owner']
+}
+},
 
-    // ================= AUTH =================
-    {
-        path: '/auth/boxed-signin',
-        name: 'login',
-        component: Login,
-        meta: {
-            layout: 'auth',
-        },
-    },
+{
+path: '/users/create',
+component: () => import('@/views/auth/boxed-signup.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador']
+}
+},
 
-    {
-        path: '/auth/boxed-password-reset',
-        component: () => import('@/views/auth/boxed-password-reset.vue'),
-        meta: {
-            layout: 'auth',
-        },
-    },
+{
+path: '/users/password-reset',
+component: () => import('@/views/auth/cover-password-reset.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador']
+}
+},
 
-    {
-        path: '/auth/reset-password/:uid/:token/',
-        name: 'ResetPassword',
-        component: () => import('@/views/auth/reset-password.vue'),
-        meta: {
-            layout: 'auth',
-        },
-    },
-    {
-        path: '/users/roles',
-        name: 'UserRoles',
-        component: () => import('@/views/users/UserRolesView.vue'),
-        meta: {
-            requiresAuth: true,
-            layout: 'app',
-        },
-    },
-    {
-        path: '/project/create',
-        name: 'ProyectoCrear',
-        component: () => import('@/views/project/CreateProyect.vue'),
-        meta: { requiresAuth: true, layout: 'app' },
-    },
-    {
-        path: '/project',
-        name: 'ProyectoTabla',
-        component: () => import('@/views/project/ViewProyect.vue'),
-        meta: { requiresAuth: true, layout: 'app' },
-    },
-];
+{
+path: '/users/roles',
+component: () => import('@/views/users/UserRolesView.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador']
+}
+},
+
+{
+path: '/users/unidades-negocio',
+component: () => import('@/views/users/UnidadesNegocioView.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser']
+}
+},
+
+// ================= PROJECTS =================
+
+{
+path: '/project/create',
+component: () => import('@/views/project/CreateProyect.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador','Owner','Tester']
+}
+},
+
+{
+path: '/project',
+component: () => import('@/views/project/ViewProyect.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador','Owner','Tester']
+}
+},
+
+// ================= TEAMS =================
+
+{
+path: '/teams',
+component: () => import('@/views/teams/TeamsView.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador','Owner']
+}
+},
+
+{
+path: '/teams/create',
+name: 'CreateTeam',
+component: () => import('@/views/teams/tabs/CreateTeam.vue'),
+meta:{
+requiresAuth:true,
+layout:'app',
+roles:['Superuser','Administrador']
+}
+},
+
+// ================= AUTH =================
+
+{
+path: '/auth/boxed-signin',
+name: 'login',
+component: Login,
+meta:{ layout:'auth' }
+},
+
+{
+path: '/auth/boxed-password-reset',
+component: () => import('@/views/auth/boxed-password-reset.vue'),
+meta:{ layout:'auth' }
+},
+
+{
+path: '/auth/reset-password/:uid/:token',
+component: () => import('@/views/auth/reset-password.vue'),
+meta:{ layout:'auth' }
+},
+
+]
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes,
-});
+history: createWebHistory(),
+routes,
+})
 
 router.beforeEach(async (to, from, next) => {
-    const store = useAppStore();
 
-    // Forzar layout
-    store.setMainLayout(to.meta?.layout === 'auth' ? 'auth' : 'app');
+const store = useAppStore()
 
-    const tokenExp = localStorage.getItem('token_exp');
+store.setMainLayout(
+to.meta?.layout === 'auth' ? 'auth' : 'app'
+)
 
-    // Rutas protegidas
-    if (to.meta?.requiresAuth) {
-        if (!tokenExp) {
-            next('/auth/boxed-signin');
-            return;
-        }
+/* ================= AUTH ================= */
 
-        const expDate = new Date(tokenExp);
-        const now = new Date();
+if (!to.meta.requiresAuth) {
+next()
+return
+}
 
-        if (now > expDate) {
-            localStorage.removeItem('token_exp');
-            next('/auth/boxed-signin');
-            return;
-        }
-    }
+const tokenExp = localStorage.getItem('token_exp')
 
-    // Evitar volver al login si ya está logueado
-    if (tokenExp && to.path === '/auth/boxed-signin') {
-        next('/dashboard');
-        return;
-    }
+if (!tokenExp) {
+next('/auth/boxed-signin')
+return
+}
 
-    next();
-});
+const expDate = new Date(tokenExp)
+const now = new Date()
 
-export default router;
+if (now > expDate) {
+
+localStorage.removeItem('token_exp')
+
+next('/auth/boxed-signin')
+return
+
+}
+
+try {
+
+const res = await api.get('/itwframe/auth/me/')
+
+const role = res.data.role
+
+const roles = to.meta.roles as string[] | undefined
+
+if (roles && !roles.includes(role)) {
+
+next('/dashboard')
+return
+
+}
+
+next()
+
+} catch {
+
+next('/auth/boxed-signin')
+
+}
+
+})
+
+export default router

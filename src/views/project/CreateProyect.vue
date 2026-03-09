@@ -19,7 +19,6 @@
       </div>
 
       <div class="flex items-center gap-3">
-        
         <button
           type="button"
           class="btn btn-outline-primary"
@@ -55,10 +54,10 @@
               v-model.trim="form.nombre"
               type="text"
               class="form-input w-full"
-              maxlength="30"
+              maxlength="50"
               :disabled="loading"
             />
-            <p class="mt-1 text-xs text-gray-500">Máx. 30 caracteres</p>
+            <p class="mt-1 text-xs text-gray-500">Máx. 50 caracteres</p>
           </div>
 
           <div>
@@ -67,143 +66,75 @@
               v-model.trim="form.descripcion_corta"
               type="text"
               class="form-input w-full"
-              maxlength="50"
+              maxlength="400"
               :disabled="loading"
             />
-            <p class="mt-1 text-xs text-gray-500">Máx. 50 caracteres</p>
+            <p class="mt-1 text-xs text-gray-500">Máx. 400 caracteres</p>
           </div>
         </div>
 
         <!-- ROW 2 -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+          <!-- UNIDAD NEGOCIO -->
           <div>
             <label class="block text-sm mb-1">Unidad de negocio *</label>
             <select
-              v-model.number="form.id_unidad_negocio"
+              v-model.number="form.unidad_negocio_id"
               class="form-select w-full"
               :disabled="loading || catalogsLoading"
             >
               <option :value="null" disabled>Selecciona una unidad...</option>
               <option
                 v-for="u in unidadesNegocio"
-                :key="u.id_unidad_negocio"
-                :value="u.id_unidad_negocio"
+                :key="u.id"
+                :value="u.id"
               >
-                {{ u.nombre }}
+                {{ u.nombre_unidad }}
               </option>
             </select>
           </div>
 
+          <!-- PLATAFORMA -->
           <div>
             <label class="block text-sm mb-1">Plataforma *</label>
             <select
-              v-model.number="form.id_plataforma"
+              v-model.number="form.plataforma_id"
               class="form-select w-full"
               :disabled="loading || catalogsLoading"
             >
               <option :value="null" disabled>Selecciona una plataforma...</option>
               <option
                 v-for="p in plataformas"
-                :key="p.id_plataforma"
-                :value="p.id_plataforma"
+                :key="p.id"
+                :value="p.id"
               >
                 {{ p.nombre_plataforma }}
               </option>
             </select>
           </div>
 
-          <div class="flex items-center gap-3 md:justify-end">
-            <input
-              id="status_integracion"
-              type="checkbox"
-              class="form-checkbox"
-              v-model="form.status_integracion"
-              :disabled="loading"
-            />
-            <label for="status_integracion" class="text-sm">
-              Integración activa
-            </label>
+          <!-- RESPONSABLE (OWNER) -->
+          <div>
+            <label class="block text-sm mb-1">Responsable *</label>
+            <select
+              v-model.number="form.responsable_id"
+              class="form-select w-full"
+              :disabled="loading || ownersLoading || !isAdmin"
+            >
+            <option :value="null" disabled>Selecciona un responsable ...</option>
+              <option
+                v-for="o in owners"
+                :key="o.id"
+                :value="o.id"
+              >
+                {{ o.username }}
+              </option>
+            </select>
+
+            <p v-if="!isAdmin" class="mt-1 text-xs text-gray-500">
+              Como Owner, solo puedes asignarte a ti mismo.
+            </p>
           </div>
-        </div>
-
-        <!-- ================= TESTERS TABLE ================= -->
-        <div class="border-t pt-6">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
-            <div>
-              <h2 class="text-base font-semibold">Asignar testers</h2>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <input
-                v-model="testerSearch"
-                type="text"
-                placeholder="Buscar tester (usuario)"
-                class="w-full sm:w-[280px] px-3 py-2 text-sm rounded-md
-                       bg-gray-100 dark:bg-[#1a233a]
-                       border border-transparent focus:border-primary/40 focus:outline-none"
-                :disabled="loading || testersLoading"
-              />
-
-              
-            </div>
-          </div>
-
-          <div v-if="testersLoading" class="text-sm text-gray-400 py-3">
-            Cargando testers...
-          </div>
-
-          <div
-            v-else
-            class="rounded-md border border-gray-200 dark:border-white/10 overflow-hidden"
-          >
-            <div class="overflow-x-auto">
-              <table class="w-full min-w-[720px] text-sm">
-                <thead class="bg-gray-50 dark:bg-white/5">
-                  <tr class="text-left">
-                    <th class="p-3 w-[60px]">
-                      <input
-                        type="checkbox"
-                        class="form-checkbox"
-                        :checked="allSelectedVisible"
-                        @change="toggleAllTesters"
-                        :disabled="loading || filteredTesters.length === 0"
-                      />
-                    </th>
-                    <th class="p-3">Usuario</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr
-                    v-for="t in filteredTesters"
-                    :key="t.id"
-                    class="border-t border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5"
-                  >
-                    <td class="p-3">
-                      <input
-                        type="checkbox"
-                        class="form-checkbox"
-                        :value="t.id"
-                        v-model="form.tester_ids"
-                        :disabled="loading"
-                      />
-                    </td>
-                    <td class="p-3 font-medium">{{ t.username || '-' }}</td>
-                  </tr>
-
-                  <tr v-if="filteredTesters.length === 0">
-                    <td class="p-4 text-gray-400" colspan="4">
-                      No hay testers disponibles.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <p class="mt-2 text-xs text-gray-500">
-            Seleccionados: <strong>{{ form.tester_ids.length }}</strong>
-          </p>
         </div>
 
         <!-- ACTIONS -->
@@ -224,19 +155,9 @@
       </form>
     </div>
 
-    <!-- ================== PANEL DERECHO DESPLEGABLE (DRAWER) ================== -->
-    <div
-      v-show="projectsDrawerOpen"
-      class="fixed inset-0 z-[60]"
-      aria-hidden="true"
-    >
-      <!-- Overlay -->
-      <div
-        class="absolute inset-0 bg-black/30"
-        @click="closeProjectsPanel()"
-      ></div>
+    <div v-show="projectsDrawerOpen" class="fixed inset-0 z-[60]" aria-hidden="true">
+      <div class="absolute inset-0 bg-black/30" @click="closeProjectsPanel()"></div>
 
-      <!-- Drawer (abre hacia la derecha) -->
       <aside
         class="absolute right-0 top-0 h-full w-[92vw] sm:w-[420px]
                bg-white dark:bg-[#0e1726]
@@ -246,23 +167,17 @@
         :class="projectsDrawerOpen ? 'translate-x-0' : 'translate-x-full'"
       >
         <div class="h-full flex flex-col">
-          <!-- Drawer header -->
           <div class="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
             <div>
               <p class="font-semibold">Proyectos</p>
               <p class="text-xs text-gray-500">Lista y búsqueda</p>
             </div>
 
-            <button
-              type="button"
-              class="btn btn-outline-danger"
-              @click="closeProjectsPanel()"
-            >
+            <button type="button" class="btn btn-outline-danger" @click="closeProjectsPanel()">
               Cerrar
             </button>
           </div>
 
-          <!-- Search -->
           <div class="p-4">
             <input
               v-model="projectSearch"
@@ -273,7 +188,6 @@
             />
           </div>
 
-          <!-- List -->
           <div class="flex-1 overflow-y-auto px-4 pb-4">
             <div v-if="projectsLoading" class="text-sm text-gray-400 py-2">
               Cargando proyectos...
@@ -285,7 +199,7 @@
 
             <button
               v-for="p in filteredProjects"
-              :key="p.id_proyecto"
+              :key="p.id_proyecto || p.id"
               type="button"
               class="w-full text-left p-3 rounded-md border border-gray-100 dark:border-white/10
                      hover:bg-gray-50 dark:hover:bg-white/5 transition mb-2"
@@ -299,7 +213,6 @@
             </button>
           </div>
 
-          <!-- Footer -->
           <div class="p-4 border-t border-gray-200 dark:border-white/10">
             <button
               type="button"
@@ -313,157 +226,320 @@
         </div>
       </aside>
     </div>
+
   </div>
 </template>
 
-<script setup>
-import { computed, onMounted, ref } from "vue";
-import api from "@/api/axios/axios";
+<script setup lang="ts">
+import { computed, onMounted, ref } from "vue"
+import api from "@/api/axios/axios"
 
-const loading = ref(false);
-const testersLoading = ref(false);
-const projectsLoading = ref(false);
-const catalogsLoading = ref(false);
+const loading = ref(false)
+const projectsLoading = ref(false)
+const catalogsLoading = ref(false)
+const ownersLoading = ref(false)
 
-const error = ref("");
-const success = ref("");
+const error = ref("")
+const success = ref("")
 
-const unidadesNegocio = ref([]);
-const projects = ref([]);
-const testers = ref([]);
+const unidadesNegocio = ref<any[]>([])
+const plataformas = ref<any[]>([])
+const owners = ref<any[]>([])
+const projects = ref<any[]>([])
 
-const projectsDrawerOpen = ref(false);
+const projectsDrawerOpen = ref(false)
+const projectSearch = ref("")
 
-const projectSearch = ref("");
-const testerSearch = ref("");
+const currentUser = ref<any>(null)
+const isAdmin = ref(false)
+
+function normalizeRole(role: any) {
+  return String(role || "").trim().toLowerCase()
+}
+
+async function loadMe() {
+
+  const res = await api.get("/itwframe/auth/me/")
+
+  currentUser.value = res.data
+
+  const role = normalizeRole(res.data?.role)
+  const superFlag = !!res.data?.is_superuser
+
+  isAdmin.value =
+    superFlag ||
+    role === "administrador" ||
+    role === "superuser"
+
+}
+
+async function loadUnidades() {
+
+  try {
+
+    const res = await api.get("/itwframe/manage-unidad-negocio/")
+    unidadesNegocio.value = res.data?.results ?? []
+
+  } catch (err) {
+
+    unidadesNegocio.value = []
+    error.value = "No se pudieron cargar las unidades de negocio."
+
+  }
+
+}
+
+async function loadPlataformas() {
+
+  try {
+
+    const res = await api.get("/itwframe/manage-plataforma/")
+    plataformas.value = res.data?.results ?? []
+
+  } catch {
+
+    plataformas.value = []
+    error.value = "No se pudieron cargar las plataformas."
+
+  }
+
+}
+
+async function loadOwners() {
+
+  ownersLoading.value = true
+
+  try {
+
+    const res = await api.get("/itwframe/roles/users/")
+    const users = res.data?.results ?? res.data ?? []
+
+    const onlyOwners = users.filter(
+      (u: any) => normalizeRole(u?.role) === "owner"
+    )
+
+    if (isAdmin.value) {
+
+      owners.value = onlyOwners
+
+    } else {
+
+      owners.value = onlyOwners.filter(
+        (u: any) => u.id === currentUser.value?.id
+      )
+
+      form.value.responsable_id = currentUser.value?.id ?? null
+
+    }
+
+  } catch {
+
+    owners.value = []
+    error.value = "No se pudieron cargar los responsables."
+
+  } finally {
+
+    ownersLoading.value = false
+
+  }
+
+}
 
 const form = ref({
+
   nombre: "",
   descripcion_corta: "",
-  estado_integracion: true,
-  unidad_negocio_id: null,
-  plataforma_id: null,
-  tester_ids: [],
-});
+  unidad_negocio_id: null as number | null,
+  plataforma_id: null as number | null,
+  responsable_id: null as number | null,
 
-/* ================================
-   TESTERS 
-================================ */
-async function loadTesters() {
-  testersLoading.value = true;
-  try {
-    const res = await api.get("/itwframe/roles/users/");
-    const raw = res.data ?? [];
+})
 
-    testers.value = raw.filter(
-      (u) => u.role && u.role.toLowerCase() === "tester"
-    );
-  } catch (e) {
-    testers.value = [];
-  } finally {
-    testersLoading.value = false;
-  }
-}
-
-const filteredTesters = computed(() => {
-  const q = testerSearch.value.toLowerCase();
-  if (!q) return testers.value;
-
-  return testers.value.filter((t) =>
-    t.username.toLowerCase().includes(q)
-  );
-});
-
-/* ================================
-   UNIDAD NEGOCIO
-================================ */
-async function loadUnidades() {
-  catalogsLoading.value = true;
-  try {
-    const res = await api.get("/itwframe/manage-unidad-negocio/");
-    unidadesNegocio.value = res.data.results ?? [];
-  } catch (e) {
-    error.value = "No se pudieron cargar las unidades.";
-  } finally {
-    catalogsLoading.value = false;
-  }
-}
-
-/* ================================
-   PROYECTOS 
-================================ */
 async function loadProjects() {
-  projectsLoading.value = true;
+
+  projectsLoading.value = true
+
   try {
-    const res = await api.get("/itwframe/manage-project/");
-    projects.value = res.data.results ?? [];
-  } catch (e) {
-    projects.value = [];
+
+    const res = await api.get("/itwframe/manage-project/")
+    projects.value = res.data?.results ?? []
+
+  } catch {
+
+    projects.value = []
+
   } finally {
-    projectsLoading.value = false;
+
+    projectsLoading.value = false
+
   }
+
 }
 
 const filteredProjects = computed(() => {
-  const q = projectSearch.value.toLowerCase();
-  if (!q) return projects.value;
 
-  return projects.value.filter((p) =>
-    p.nombre.toLowerCase().includes(q)
-  );
-});
+  const q = projectSearch.value.toLowerCase().trim()
+
+  if (!q) return projects.value
+
+  return projects.value.filter((p: any) =>
+    String(p.nombre || "").toLowerCase().includes(q)
+  )
+
+})
 
 function openProjectsPanel() {
-  projectsDrawerOpen.value = true;
+  projectsDrawerOpen.value = true
 }
 
 function closeProjectsPanel() {
-  projectsDrawerOpen.value = false;
+  projectsDrawerOpen.value = false
 }
 
-/* ================================
-   CREAR PROYECTO
-================================ */
+async function refreshProjects() {
+  await loadProjects()
+}
+
+function goToProject(p: any) {
+  projectsDrawerOpen.value = false
+}
+
+
+function validarFormulario() {
+
+  const nombre = form.value.nombre?.trim()
+  const descripcion = form.value.descripcion_corta?.trim()
+
+  if (!nombre) {
+    return "El nombre del proyecto es obligatorio."
+  }
+
+  if (nombre.length > 30) {
+    return "El nombre no puede exceder 30 caracteres."
+  }
+
+  if (!descripcion) {
+    return "La descripción es obligatoria."
+  }
+
+  if (descripcion.length > 400) {
+    return "La descripción no puede exceder 400 caracteres."
+  }
+
+  if (!form.value.unidad_negocio_id) {
+    return "Debes seleccionar una unidad de negocio."
+  }
+
+  if (!form.value.plataforma_id) {
+    return "Debes seleccionar una plataforma."
+  }
+
+  if (!form.value.responsable_id) {
+    return "Debes seleccionar un responsable."
+  }
+
+  return null
+
+}
+
+
 async function handleSubmit() {
-  error.value = "";
-  success.value = "";
 
-  if (!form.value.nombre) {
-    error.value = "El nombre es obligatorio.";
-    return;
+  error.value = ""
+  success.value = ""
+
+  const validationError = validarFormulario()
+
+  if (validationError) {
+
+    error.value = validationError
+    return
+
   }
 
-  loading.value = true;
+  loading.value = true
+
   try {
-    const payload = {
-      nombre: form.value.nombre,
-      descripcion_corta: form.value.descripcion_corta,
-      estado_integracion: form.value.estado_integracion,
-      unidad_negocio_id: form.value.unidad_negocio_id,
-      plataforma_id: form.value.plataforma_id,
-    };
 
-    const res = await api.post(
-      "/itwframe/manage-project/",
-      payload
-    );
+   const payload = {
 
-    success.value = "Proyecto creado correctamente.";
-    form.value.nombre = "";
-    form.value.descripcion_corta = "";
-    form.value.tester_ids = [];
+  nombre: form.value.nombre.trim(),
+  descripcion_corta: form.value.descripcion_corta.trim(),
+  unidad_negocio: form.value.unidad_negocio_id,
+  plataforma: form.value.plataforma_id,
+  responsable: form.value.responsable_id,
 
-    await loadProjects();
-  } catch (e) {
-    error.value = "Error al crear el proyecto.";
-  } finally {
-    loading.value = false;
-  }
 }
 
-onMounted(() => {
-  loadTesters();
-  loadUnidades();
-  loadProjects();
-});
+    await api.post("/itwframe/manage-project/", payload)
+
+    success.value = "Proyecto creado correctamente."
+
+    resetForm()
+
+    await loadProjects()
+
+  } catch (e: any) {
+
+    const data = e?.response?.data
+
+    console.log("ERROR BACKEND:", data)
+
+    if (typeof data === "string") {
+
+      error.value = data
+
+    } else if (data?.error) {
+
+      error.value = data.error
+
+    } else if (data) {
+
+      error.value = JSON.stringify(data)
+
+    } else {
+
+      error.value = "No se pudo crear el proyecto."
+
+    }
+
+  } finally {
+
+    loading.value = false
+
+  }
+
+}
+
+function resetForm() {
+
+  form.value.nombre = ""
+  form.value.descripcion_corta = ""
+  form.value.unidad_negocio_id = null
+  form.value.plataforma_id = null
+
+  form.value.responsable_id =
+    isAdmin.value
+      ? null
+      : currentUser.value?.id ?? null
+
+}
+
+onMounted(async () => {
+
+  catalogsLoading.value = true
+
+  await loadMe()
+
+  await Promise.all([
+    loadUnidades(),
+    loadPlataformas(),
+    loadProjects(),
+  ])
+
+  await loadOwners()
+
+  catalogsLoading.value = false
+
+})
 </script>

@@ -1,5 +1,11 @@
 <template>
-  <div class="p-6">
+
+<!-- BLOQUEO PARA TESTER -->
+<div v-if="isTester" class="p-6 text-center text-red-500 font-semibold">
+  No tienes permisos para ver esta sección
+</div>
+
+<div v-else class="p-6">
 
     <!-- Breadcrumb -->
     <nav class="mb-4 text-sm text-gray-500">
@@ -46,6 +52,7 @@
     <!-- Tabla -->
     <div class="panel table-responsive">
       <table class="table table-hover">
+
         <thead>
           <tr>
             <th>Nombre</th>
@@ -57,19 +64,23 @@
         </thead>
 
         <tbody>
+
           <tr
             v-for="u in users"
             :key="u.id"
           >
+
             <td class="font-semibold">
               {{ u.first_name || '—' }} {{ u.last_name || '' }}
             </td>
 
             <td>{{ u.username }}</td>
+
             <td>{{ u.email || '—' }}</td>
 
             <!-- Estado -->
             <td class="text-center">
+
               <span
                 class="badge"
                 :class="u.is_active
@@ -78,51 +89,87 @@
               >
                 {{ u.is_active ? 'Activo' : 'Inactivo' }}
               </span>
+
             </td>
 
-            <!-- Acciones -->
+            <!-- ACCIONES SEGUN ROL -->
             <td class="text-center">
+
               <div class="flex justify-center gap-2">
 
-                <button
-                  v-if="u.is_active"
-                  class="btn btn-outline-warning btn-sm"
-                  @click="openEditModal(u)"
-                >
-                  Editar
-                </button>
+                <!-- SUPERUSER -->
+                <template v-if="isSuperUser">
 
-                <button
-                  v-if="u.is_active"
-                  class="btn btn-outline-danger btn-sm"
-                  @click="confirmDisable(u)"
-                >
-                  Deshabilitar
-                </button>
+                  <button
+                    v-if="u.is_active"
+                    class="btn btn-outline-warning btn-sm"
+                    @click="openEditModal(u)"
+                  >
+                    Editar
+                  </button>
 
-                <button
-                  v-else
-                  class="btn btn-outline-primary btn-sm"
-                  @click="activateUser(u)"
-                >
-                  Activar
-                </button>
+                  <button
+                    v-if="u.is_active"
+                    class="btn btn-outline-danger btn-sm"
+                    @click="confirmDisable(u)"
+                  >
+                    Deshabilitar
+                  </button>
+
+                  <button
+                    v-else
+                    class="btn btn-outline-primary btn-sm"
+                    @click="activateUser(u)"
+                  >
+                    Activar
+                  </button>
+
+                </template>
+
+                <!-- ADMIN -->
+                <template v-else-if="isAdmin">
+
+                  <button
+                    v-if="u.is_active"
+                    class="btn btn-outline-warning btn-sm"
+                    @click="openEditModal(u)"
+                  >
+                    Editar
+                  </button>
+
+                </template>
+
+                <!-- OWNER -->
+                <template v-else-if="isOwner">
+
+                  <span class="badge badge-outline-info">
+                    Solo lectura
+                  </span>
+
+                </template>
 
               </div>
+
             </td>
+
           </tr>
 
           <!-- Empty -->
           <tr v-if="users.length === 0">
+
             <td colspan="5" class="text-center py-6 opacity-60">
+
               {{ showInactive
                 ? 'No hay usuarios inactivos'
                 : 'No hay usuarios activos'
               }}
+
             </td>
+
           </tr>
 
         </tbody>
+
       </table>
     </div>
 
@@ -131,12 +178,15 @@
       v-if="showModal && selectedUser"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
     >
+
       <div class="panel w-full max-w-md">
+
         <h2 class="text-lg font-semibold mb-4">
           Editar usuario
         </h2>
 
         <form class="space-y-4">
+
           <input
             v-model="selectedUser.first_name"
             class="form-input"
@@ -156,6 +206,7 @@
           />
 
           <div class="flex justify-end gap-2 pt-4">
+
             <button
               type="button"
               class="btn btn-outline-secondary"
@@ -171,45 +222,54 @@
             >
               Guardar cambios
             </button>
+
           </div>
+
         </form>
+
       </div>
+
     </div>
 
-  </div>
+</div>
+
 </template>
 
 <script setup lang="ts">
+
 import { ref, onMounted, watch } from 'vue'
 import api from '@/api/axios/axios'
 import Swal from 'sweetalert2'
 
 interface User {
-  id: number
-  username: string
-  first_name: string
-  last_name: string
-  email: string
-  is_active: boolean
+  id:number
+  username:string
+  first_name:string
+  last_name:string
+  email:string
+  is_active:boolean
 }
 
 const users = ref<User[]>([])
 const selectedUser = ref<User | null>(null)
+
 const showModal = ref(false)
 const showInactive = ref(false)
+const role = ref("")
 
-/* ================= FETCH USERS ================= */
+const isSuperUser = ref(false)
+const isAdmin = ref(false)
+const isOwner = ref(false)
+const isTester = ref(false)
+
 const fetchUsers = async () => {
 
-  // 
-  const hasSession = sessionStorage.getItem('user')
-  if (!hasSession) return
-
   try {
+
     const status = showInactive.value ? 'inactive' : 'active'
 
     const res = await api.get('/itwframe/manage-users/', {
-      params: { status }
+      params:{ status }
     })
 
     if (Array.isArray(res.data)) {
@@ -218,116 +278,164 @@ const fetchUsers = async () => {
       users.value = res.data.results || []
     }
 
-  } catch (error: any) {
+  } catch (error:any) {
 
     if (error.response?.status === 401) return
 
-    Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error')
+    Swal.fire('Error','No se pudieron cargar los usuarios','error')
+
   }
+
 }
 
-/* ================= WATCH TOGGLE ================= */
-watch(showInactive, () => {
-  fetchUsers()
-})
+watch(showInactive,fetchUsers)
 
-/* ================= MODAL ================= */
-const openEditModal = (user: User) => {
+const openEditModal = (user:User) => {
+
   selectedUser.value = { ...user }
   showModal.value = true
+
 }
 
 const closeModal = () => {
+
   showModal.value = false
   selectedUser.value = null
+
 }
 
 const confirmUpdate = async () => {
+
   if (!selectedUser.value) return
 
   try {
-    await api.put(
-      `/itwframe/manage-users/${selectedUser.value.id}/`,
-      {
-        first_name: selectedUser.value.first_name,
-        last_name: selectedUser.value.last_name,
-        email: selectedUser.value.email,
-      }
-    )
+
+    await api.put(`/itwframe/manage-users/${selectedUser.value.id}/`,{
+
+      first_name:selectedUser.value.first_name,
+      last_name:selectedUser.value.last_name,
+      email:selectedUser.value.email,
+
+    })
 
     Swal.fire({
-      icon: 'success',
-      title: 'Usuario actualizado',
-      timer: 1400,
-      showConfirmButton: false,
+      icon:'success',
+      title:'Usuario actualizado',
+      timer:1400,
+      showConfirmButton:false,
     })
 
     await fetchUsers()
     closeModal()
 
-  } catch (error) {
-    console.error(error)
-    Swal.fire('Error', 'No se pudo actualizar el usuario', 'error')
+  } catch {
+
+    Swal.fire('Error','No se pudo actualizar el usuario','error')
+
   }
+
 }
 
-/* ================= DESHABILITAR ================= */
-const confirmDisable = async (user: User) => {
+const confirmDisable = async (user:User) => {
+
   const result = await Swal.fire({
-    icon: 'warning',
-    title: 'Deshabilitar usuario',
-    html: `<strong>${user.username}</strong><br>¿Deseas deshabilitarlo?`,
-    showCancelButton: true,
-    confirmButtonText: 'Sí, deshabilitar',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#e7515a',
+
+    icon:'warning',
+    title:'Deshabilitar usuario',
+    html:`<strong>${user.username}</strong><br>¿Deseas deshabilitarlo?`,
+    showCancelButton:true,
+    confirmButtonText:'Sí, deshabilitar',
+    cancelButtonText:'Cancelar',
+    confirmButtonColor:'#e7515a',
+
   })
 
   if (!result.isConfirmed) return
 
   try {
-    await api.put(`/itwframe/manage-users/${user.id}/`, {
-      is_active: false,
+
+    await api.put(`/itwframe/manage-users/${user.id}/`,{
+      is_active:false,
     })
 
     Swal.fire({
-      icon: 'success',
-      title: 'Usuario deshabilitado',
-      timer: 1200,
-      showConfirmButton: false,
+      icon:'success',
+      title:'Usuario deshabilitado',
+      timer:1200,
+      showConfirmButton:false,
     })
 
     await fetchUsers()
 
-  } catch (error) {
-    console.error(error)
-    Swal.fire('Error', 'No se pudo deshabilitar', 'error')
+  } catch {
+
+    Swal.fire('Error','No se pudo deshabilitar','error')
+
   }
+
 }
 
-/* ================= ACTIVAR ================= */
-const activateUser = async (user: User) => {
+const activateUser = async (user:User) => {
+
   try {
-    await api.put(`/itwframe/manage-users/${user.id}/`, {
-      is_active: true,
+
+    await api.put(`/itwframe/manage-users/${user.id}/`,{
+      is_active:true,
     })
 
     Swal.fire({
-      icon: 'success',
-      title: 'Usuario activado',
-      timer: 1200,
-      showConfirmButton: false,
+      icon:'success',
+      title:'Usuario activado',
+      timer:1200,
+      showConfirmButton:false,
     })
 
     await fetchUsers()
 
-  } catch (error) {
-    console.error(error)
-    Swal.fire('Error', 'No se pudo activar', 'error')
+  } catch {
+
+    Swal.fire('Error','No se pudo activar','error')
+
   }
+
 }
 
-/* ================= INIT ================= */
-onMounted(fetchUsers)
+onMounted(async () => {
+
+  try {
+
+    const res = await api.get("/itwframe/auth/me/")
+
+    const data = res.data
+
+    role.value = data.role || ""
+
+    if (data.is_superuser) {
+
+      isSuperUser.value = true
+      isAdmin.value = true
+      isOwner.value = true
+      isTester.value = false
+
+    } else {
+
+      isSuperUser.value = false
+      isAdmin.value = role.value === "Administrador"
+      isOwner.value = role.value === "Owner"
+      isTester.value = role.value === "Tester"
+
+    }
+
+    if (!isTester.value) {
+      fetchUsers()
+    }
+
+  } catch (error) {
+
+    console.error("Error obteniendo usuario", error)
+
+  }
+
+})
 
 </script>
