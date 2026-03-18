@@ -140,25 +140,15 @@
               class="ml-8 mt-1 space-y-1 text-sm"
             >
 
-              <!-- TABLA PROYECTOS -->
-              <li>
-                <router-link
-                  to="/project"
-                  class="block px-3 py-2 rounded-md
-                         hover:bg-gray-100 dark:hover:bg-[#1a233a]"
-                >
-                  Tabla de proyectos
-                </router-link>
-              </li>
 
-              <!-- CREAR PROYECTO -->
-              <li v-if="isSuperUser || isAdmin">
+              <!-- GESTION DE PROYECTO -->
+              <li v-if="isSuperUser || isAdmin || isOwner">
                 <router-link
                   to="/project/create"
                   class="block px-3 py-2 rounded-md
                          hover:bg-gray-100 dark:hover:bg-[#1a233a]"
                 >
-                  Crear proyecto
+                  Gestion de Proyecto
                 </router-link>
               </li>
 

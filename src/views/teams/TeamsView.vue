@@ -31,29 +31,32 @@
       </div>
 
       <div class="p-6">
-        <CreateTeam v-if="activeTab === 'create'" />
-        <ListTeams v-if="activeTab === 'list'" />
+
+        <TeamsTab v-if="activeTab === 'teams'" />
+
         <ManageMembers v-if="activeTab === 'members'" />
+
         <AssignProject v-if="activeTab === 'project'" />
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+
 import { ref } from "vue"
 
-import CreateTeam from "./tabs/CreateTeam.vue"
-import ListTeams from "./tabs/ListTeams.vue"
+import TeamsTab from "./tabs/TeamsTab.vue"
 import ManageMembers from "./tabs/ManageMembers.vue"
 import AssignProject from "./tabs/AssignProject.vue"
 
 const tabs = [
-  { id: "create", label: "Crear Equipo" },
-  { id: "list", label: "Consultar Equipos" },
+  { id: "teams", label: "Equipos" },
   { id: "members", label: "Administrar Miembros" },
   { id: "project", label: "Asignar Proyecto" }
 ]
 
-const activeTab = ref("create")
+const activeTab = ref("teams")
+
 </script>

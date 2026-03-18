@@ -217,7 +217,7 @@ const filteredRoles = computed(() => {
 
 /* ================= FETCH USERS ================= */
 const fetchUsers = async () => {
-  if (!hasSession()) return
+  if (!hasSession()) return  
   const res = await api.get('/itwframe/roles/users/')
   users.value = res.data
 }
