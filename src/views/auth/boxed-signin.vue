@@ -97,7 +97,7 @@ import Swal from 'sweetalert2'
 export default defineComponent({
   name: 'Login',
 
-  setup() {
+  mounted() {
     useMeta({ title: 'Iniciar sesión' })
   },
 
@@ -156,7 +156,6 @@ export default defineComponent({
         sessionStorage.setItem('user', JSON.stringify(userData))
         localStorage.setItem('token_exp', String(userData.exp))
 
-        // 🔐 Cambio obligatorio
         if (forcePasswordChange) {
 
           const uid = response.data.uid
@@ -198,7 +197,6 @@ export default defineComponent({
         const status = err.response?.status
         const data = err.response?.data
 
-        // 🔐 Cuenta bloqueada desde backend
         if (status === 403 && data?.locked) {
           this.isBlocked = true
 
@@ -209,13 +207,11 @@ export default defineComponent({
           })
         }
 
-        // ❌ Credenciales incorrectas
         else if (status === 401) {
 
           this.attemptsRemaining = data?.attempts_remaining ?? 0
           this.error = data?.error || 'Usuario o contraseña incorrectos'
 
-          // 🔒 Solo mostramos Swal cuando ya quedó bloqueado
           if (this.attemptsRemaining <= 0) {
             this.isBlocked = true
 
